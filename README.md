@@ -446,6 +446,313 @@ Abrir una consola de Django:
 docker compose exec web python app/manage.py shell
 ```
 
+## Uso de la consola y protocolo Git
+
+Todos los comandos de Git deben ejecutarse desde la raíz del proyecto:
+
+```powershell
+cd C:\proyectos\TAEB_TESIS
+```
+
+Para comprobar la carpeta actual:
+
+```powershell
+Get-Location
+```
+
+Para revisar archivos modificados y la rama activa:
+
+```powershell
+git status
+git branch --show-current
+```
+
+### Ramas principales
+
+El proyecto utiliza:
+
+- `main`: versión estable.
+- `desarrollo`: integración de funcionalidades terminadas.
+- Ramas de trabajo: cambios de cada tarea o funcionalidad.
+
+No se debe trabajar ni hacer commits directamente sobre `main` o `desarrollo`.
+Cada tarea debe realizarse en una rama nueva creada desde `desarrollo`.
+
+### Nombres recomendados para ramas
+
+Utilizar nombres breves, descriptivos y sin espacios:
+
+```text
+feature/modulo-alumnos
+feature/barra-lateral
+fix/error-login
+docs/manual-instalacion
+refactor/estructura-templates
+```
+
+Prefijos sugeridos:
+
+| Prefijo | Uso |
+|---|---|
+| `feature/` | Nueva funcionalidad |
+| `fix/` | Corrección de un error |
+| `docs/` | Cambios de documentación |
+| `refactor/` | Reorganización sin cambiar el comportamiento |
+| `test/` | Incorporación o modificación de pruebas |
+
+### 1. Actualizar `desarrollo`
+
+Antes de crear una rama nueva:
+
+```powershell
+git switch desarrollo
+git pull --ff-only origin desarrollo
+```
+
+`--ff-only` evita crear un commit de merge accidental al actualizar la rama
+local.
+
+Si existen cambios locales sin guardar, no continuar hasta revisarlos:
+
+```powershell
+git status
+```
+
+### 2. Crear una rama de trabajo
+
+Crear la rama desde `desarrollo` actualizado:
+
+```powershell
+git switch -c feature/nombre-de-la-tarea
+```
+
+Ejemplo:
+
+```powershell
+git switch -c feature/modulo-alumnos
+```
+
+Comprobar la rama activa:
+
+```powershell
+git branch --show-current
+```
+
+### 3. Trabajar y revisar los cambios
+
+Durante el desarrollo:
+
+```powershell
+git status
+git diff
+```
+
+Agregar archivos al área de preparación:
+
+```powershell
+git add ruta\del\archivo
+```
+
+Para agregar todos los cambios revisados:
+
+```powershell
+git add .
+```
+
+Antes de crear el commit:
+
+```powershell
+git diff --staged
+```
+
+Crear el commit:
+
+```powershell
+git commit -m "feat: agregar módulo inicial de alumnos"
+```
+
+Ejemplos de mensajes:
+
+```text
+feat: agregar navegación lateral
+fix: corregir redirección del login
+docs: actualizar manual de instalación
+refactor: reorganizar templates por apartados
+test: agregar pruebas del dashboard
+```
+
+Se pueden crear varios commits pequeños y relacionados durante una tarea.
+
+### 4. Actualizar la rama antes del Pull Request
+
+Antes de integrar o crear el Pull Request, actualizar nuevamente `desarrollo`:
+
+```powershell
+git switch desarrollo
+git pull --ff-only origin desarrollo
+```
+
+Volver a la rama de trabajo:
+
+```powershell
+git switch feature/nombre-de-la-tarea
+```
+
+Integrar los cambios recientes de `desarrollo`:
+
+```powershell
+git merge desarrollo
+```
+
+Este paso permite detectar y resolver conflictos en la rama de trabajo, antes
+de abrir el Pull Request.
+
+### 5. Resolver conflictos de merge
+
+Si Git informa conflictos:
+
+```powershell
+git status
+```
+
+Abrir cada archivo marcado, elegir el contenido correcto y eliminar los
+marcadores:
+
+```text
+[Inicio de cambios de la rama actual]
+Cambios de la rama de trabajo
+[Separador]
+Cambios de desarrollo
+[Fin de cambios provenientes de desarrollo]
+```
+
+En el archivo real, Git muestra esos bloques con los símbolos `<`, `=` y `>`.
+Se debe conservar únicamente el contenido correcto y eliminar todos los
+marcadores.
+
+Después de resolverlos:
+
+```powershell
+git add ruta\del\archivo-resuelto
+git commit
+```
+
+No utilizar `git reset --hard` ni descartar archivos sin revisar, porque se
+pueden perder cambios locales.
+
+### 6. Probar antes de publicar
+
+Ejecutar como mínimo:
+
+```powershell
+docker compose exec web python app/manage.py check
+docker compose exec web python app/manage.py test apps `
+  --settings=config.settings.test
+```
+
+También se debe probar manualmente la funcionalidad modificada.
+
+Comprobar el estado final:
+
+```powershell
+git status
+```
+
+### 7. Subir la rama a GitHub
+
+La primera vez:
+
+```powershell
+git push -u origin feature/nombre-de-la-tarea
+```
+
+En los siguientes envíos:
+
+```powershell
+git push
+```
+
+### 8. Crear el Pull Request
+
+En GitHub:
+
+1. Abrir el repositorio `GianniBaldii/TAEB_TESIS`.
+2. Seleccionar **Pull requests**.
+3. Presionar **New pull request**.
+4. Elegir `desarrollo` como rama base.
+5. Elegir la rama de trabajo como rama de comparación.
+6. Agregar un título claro y describir los cambios y pruebas realizadas.
+7. Crear el Pull Request.
+
+La dirección correcta debe ser:
+
+```text
+feature/nombre-de-la-tarea -> desarrollo
+```
+
+En GitHub se llama **Pull Request**. **Merge Request** es el nombre utilizado
+por GitLab.
+
+No crear normalmente Pull Requests directos hacia `main`. El paso de
+`desarrollo` a `main` debe realizarse cuando se prepara una versión estable.
+
+### 9. Integrar el Pull Request
+
+Antes de aprobar el merge se debe comprobar:
+
+- No hay conflictos.
+- Los tests pasan.
+- Los cambios fueron revisados.
+- El Pull Request apunta a `desarrollo`.
+- No se incluyeron `.env`, contraseñas, dumps ni archivos temporales.
+
+Después de integrar el Pull Request se puede eliminar la rama remota desde
+GitHub.
+
+### 10. Limpiar la rama local
+
+Una vez integrado el Pull Request:
+
+```powershell
+git switch desarrollo
+git pull --ff-only origin desarrollo
+git branch -d feature/nombre-de-la-tarea
+git fetch --prune
+```
+
+`git branch -d` solo elimina una rama que Git reconoce como integrada. Evitar
+`git branch -D` salvo que se tenga certeza de que sus cambios ya no son
+necesarios.
+
+### Flujo resumido
+
+```powershell
+# Actualizar desarrollo
+git switch desarrollo
+git pull --ff-only origin desarrollo
+
+# Crear una rama
+git switch -c feature/nombre-de-la-tarea
+
+# Trabajar y crear commits
+git status
+git add .
+git commit -m "feat: describir el cambio"
+
+# Actualizar antes del Pull Request
+git switch desarrollo
+git pull --ff-only origin desarrollo
+git switch feature/nombre-de-la-tarea
+git merge desarrollo
+
+# Probar y publicar
+docker compose exec web python app/manage.py check
+git push -u origin feature/nombre-de-la-tarea
+
+# Crear en GitHub:
+# feature/nombre-de-la-tarea -> desarrollo
+```
+
 ## Dumps de MySQL
 
 Los respaldos se guardan en `docker/mysql/dumps/` y no se versionan.
