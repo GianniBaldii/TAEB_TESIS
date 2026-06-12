@@ -839,6 +839,11 @@ MYSQL_EXTERNAL_PORT=3307
 ```text
 app/
 |-- apps/
+|   |-- alumnos/
+|   |   |-- admin_modulos/
+|   |   |-- migrations/
+|   |   |-- services/
+|   |   `-- tests/
 |   |-- core/
 |   `-- usuarios/
 |-- config/

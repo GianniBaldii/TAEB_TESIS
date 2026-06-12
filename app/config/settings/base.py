@@ -30,6 +30,7 @@ DJANGO_APPS = [
 LOCAL_APPS = [
     "apps.core",
     "apps.usuarios",
+    "apps.alumnos",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS
