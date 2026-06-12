@@ -1,0 +1,80 @@
+{% extends "layouts/autenticacion.html" %}
+
+{% block title %}Iniciar sesión | TAEB{% endblock %}
+
+{% block contenido_autenticacion %}
+<div x-data="{ mostrarContrasena: false }">
+<p class="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-300">Acceso seguro</p>
+<h1 class="mt-2 text-3xl font-bold tracking-tight text-white">Iniciar sesión</h1>
+<p class="mt-2 text-sm text-slate-300">Acceso para administradores y personal autorizado.</p>
+
+{% if form.non_field_errors %}
+<div class="mt-6 rounded-lg border border-red-300/30 bg-red-400/10 px-4 py-3 text-sm text-red-100">
+    Usuario o contraseña incorrectos.
+</div>
+{% endif %}
+
+<form method="post" class="mt-8 space-y-5">
+    {% csrf_token %}
+    {% if next %}
+    <input type="hidden" name="next" value="{{ next }}">
+    {% endif %}
+
+    <div>
+        <label for="{{ form.username.id_for_label }}" class="text-sm font-semibold text-slate-100">
+            {{ form.username.label }}
+        </label>
+        <div class="relative mt-2">
+            <svg aria-hidden="true" viewBox="0 0 24 24" class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-300" fill="none" stroke="currentColor" stroke-width="1.7">
+                <circle cx="12" cy="8" r="3.5"/>
+                <path stroke-linecap="round" d="M5.5 20a6.5 6.5 0 0 1 13 0"/>
+            </svg>
+            {{ form.username }}
+        </div>
+        {% for error in form.username.errors %}
+        <p class="mt-1 text-sm text-red-200">{{ error }}</p>
+        {% endfor %}
+    </div>
+
+    <div>
+        <label for="{{ form.password.id_for_label }}" class="text-sm font-semibold text-slate-100">
+            {{ form.password.label }}
+        </label>
+        <div class="relative mt-2">
+            <svg aria-hidden="true" viewBox="0 0 24 24" class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-300" fill="none" stroke="currentColor" stroke-width="1.7">
+                <rect x="5" y="10" width="14" height="10" rx="2"/>
+                <path stroke-linecap="round" d="M8 10V7a4 4 0 0 1 8 0v3"/>
+            </svg>
+            {{ form.password }}
+            <button
+                type="button"
+                class="absolute right-3.5 top-1/2 -translate-y-1/2 rounded p-1 text-slate-300 transition hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                x-on:click="mostrarContrasena = !mostrarContrasena"
+                x-bind:aria-label="mostrarContrasena ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+                <svg x-show="!mostrarContrasena" aria-hidden="true" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7">
+                    <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/>
+                    <circle cx="12" cy="12" r="2.5"/>
+                </svg>
+                <svg x-cloak x-show="mostrarContrasena" aria-hidden="true" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.7">
+                    <path stroke-linecap="round" d="m4 4 16 16M10.5 6.2A9.9 9.9 0 0 1 12 6c6 0 9.5 6 9.5 6a14.4 14.4 0 0 1-2.1 2.8M6.2 6.2C3.8 8 2.5 12 2.5 12s3.5 6 9.5 6c1.2 0 2.3-.2 3.3-.6"/>
+                </svg>
+            </button>
+        </div>
+        {% for error in form.password.errors %}
+        <p class="mt-1 text-sm text-red-200">{{ error }}</p>
+        {% endfor %}
+    </div>
+
+    <button
+        type="submit"
+        class="flex w-full items-center justify-center gap-2 rounded-lg bg-[#ffd915] px-4 py-3 font-bold text-[#00284a] shadow-lg shadow-black/10 transition hover:bg-[#ffe34f] focus:outline-none focus:ring-2 focus:ring-yellow-200 focus:ring-offset-2 focus:ring-offset-[#00284a]"
+    >
+        <svg aria-hidden="true" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10"/>
+        </svg>
+        Ingresar
+    </button>
+</form>
+</div>
+{% endblock %}

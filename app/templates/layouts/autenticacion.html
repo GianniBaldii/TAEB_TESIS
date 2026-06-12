@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body %}
+<main class="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#eef4fc] px-4 py-10 sm:px-6">
+    <div aria-hidden="true" class="absolute -left-12 top-12 flex rotate-[-16deg] gap-5 opacity-50">
+        <span class="h-52 w-8 rounded-full bg-white/80"></span>
+        <span class="mt-8 h-40 w-8 rounded-full bg-white/80"></span>
+        <span class="mt-16 h-28 w-8 rounded-full bg-white/80"></span>
+    </div>
+    <div aria-hidden="true" class="absolute -right-16 bottom-8 flex rotate-[-34deg] gap-5 opacity-55">
+        <span class="h-52 w-9 rounded-full bg-white/80"></span>
+        <span class="mt-10 h-40 w-9 rounded-full bg-white/80"></span>
+    </div>
+    <div aria-hidden="true" class="absolute right-8 top-8 grid grid-cols-4 gap-2 opacity-40">
+        <span class="h-1.5 w-1.5 rounded-full bg-white"></span><span class="h-1.5 w-1.5 rounded-full bg-white"></span><span class="h-1.5 w-1.5 rounded-full bg-white"></span><span class="h-1.5 w-1.5 rounded-full bg-white"></span>
+        <span class="h-1.5 w-1.5 rounded-full bg-white"></span><span class="h-1.5 w-1.5 rounded-full bg-white"></span><span class="h-1.5 w-1.5 rounded-full bg-white"></span><span class="h-1.5 w-1.5 rounded-full bg-white"></span>
+        <span class="h-1.5 w-1.5 rounded-full bg-white"></span><span class="h-1.5 w-1.5 rounded-full bg-white"></span><span class="h-1.5 w-1.5 rounded-full bg-white"></span><span class="h-1.5 w-1.5 rounded-full bg-white"></span>
+    </div>
+
+    <section class="relative z-10 grid w-full max-w-5xl overflow-hidden rounded-2xl bg-white shadow-2xl shadow-slate-500/25 md:grid-cols-2">
+        <div class="flex min-h-64 flex-col items-center justify-center px-8 py-12 text-center md:min-h-[560px] md:px-12">
+            <img
+                src="{% static 'imagenes/logos/taeb.svg' %}"
+                alt="TAEB"
+                class="h-auto w-full max-w-sm"
+                width="1245"
+                height="488"
+            >
+            <p class="mt-5 text-base font-medium text-slate-500">Sistema de gestión</p>
+            <p class="mt-1 text-sm text-slate-400">Administración integral de tu institución</p>
+        </div>
+
+        <div class="relative flex items-center bg-[#00284a] px-7 py-12 text-white sm:px-12 md:min-h-[560px]">
+            <div aria-hidden="true" class="absolute inset-0 bg-gradient-to-br from-[#073b67]/60 via-transparent to-[#001d36]/60"></div>
+            <div class="relative w-full">
+            {% block contenido_autenticacion %}{% endblock %}
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}

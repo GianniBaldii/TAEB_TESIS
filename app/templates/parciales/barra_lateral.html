@@ -1,0 +1,81 @@
+{% load static %}
+<div class="flex h-full flex-col border-r border-slate-200 bg-white">
+    <div class="flex h-24 items-center justify-between border-b border-slate-100 px-6">
+        <a href="{% url 'core:dashboard' %}" class="block">
+            <img
+                src="{% static 'imagenes/logos/taeb.svg' %}"
+                alt="TAEB"
+                class="h-auto w-40"
+                width="1245"
+                height="488"
+            >
+        </a>
+        <button
+            type="button"
+            class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden"
+            aria-label="Cerrar menú"
+            @click="barraAbierta = false"
+        >
+            <span aria-hidden="true" class="text-2xl leading-none">&times;</span>
+        </button>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto px-4 py-6">
+        <p class="px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            Gestión
+        </p>
+
+        <div class="mt-3 space-y-1">
+            <a
+                href="{% url 'core:dashboard' %}"
+                class="flex items-center gap-3 rounded-xl bg-blue-50 px-3 py-2.5 text-sm font-semibold text-blue-700"
+                aria-current="page"
+            >
+                <img src="{% static 'iconos/inicio.svg' %}" alt="" class="h-5 w-5">
+                Inicio
+            </a>
+
+            {% include "parciales/enlace_proximamente.html" with icono="iconos/alumnos.svg" texto="Alumnos" %}
+            {% include "parciales/enlace_proximamente.html" with icono="iconos/clases.svg" texto="Clases" %}
+            {% include "parciales/enlace_proximamente.html" with icono="iconos/asistencias.svg" texto="Asistencias" %}
+            {% include "parciales/enlace_proximamente.html" with icono="iconos/finanzas.svg" texto="Finanzas" %}
+            {% include "parciales/enlace_proximamente.html" with icono="iconos/eventos.svg" texto="Eventos" %}
+        </div>
+
+        {% if request.user.is_superuser %}
+        <p class="mt-8 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            Administración
+        </p>
+        <div class="mt-3">
+            <a
+                href="{% url 'admin:index' %}"
+                class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+            >
+                <img src="{% static 'iconos/usuarios.svg' %}" alt="" class="h-5 w-5">
+                Usuarios
+            </a>
+        </div>
+        {% endif %}
+    </nav>
+
+    <div class="border-t border-slate-200 p-4">
+        <div class="mb-3 px-3">
+            <p class="truncate text-sm font-semibold text-slate-800">
+                {{ request.user.get_full_name|default:request.user.username }}
+            </p>
+            <p class="text-xs text-slate-500">
+                {% if request.user.is_superuser %}Administrador{% else %}Usuario{% endif %}
+            </p>
+        </div>
+        <form method="post" action="{% url 'usuarios:logout' %}">
+            {% csrf_token %}
+            <button
+                type="submit"
+                class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-red-50 hover:text-red-700"
+            >
+                <img src="{% static 'iconos/cerrar-sesion.svg' %}" alt="" class="h-5 w-5">
+                Cerrar sesión
+            </button>
+        </form>
+    </div>
+</div>

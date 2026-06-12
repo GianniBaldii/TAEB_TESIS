@@ -1,0 +1,4 @@
+Django>=5.2,<5.3
+django-environ>=0.12,<1.0
+gunicorn>=23,<26
+mysqlclient>=2.2.7,<3.0
