@@ -1,0 +1,22 @@
+{% extends "layouts/principal.html" %}
+
+{% block title %}{% if modo == "crear" %}Nuevo alumno{% else %}Editar alumno{% endif %} | TAEB{% endblock %}
+
+{% block contenido %}
+<section class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+    <div class="mb-6 flex items-center justify-between gap-4">
+        <div>
+            <p class="text-sm font-semibold text-blue-600">Informacion de alumnos</p>
+            <h1 class="text-2xl font-bold text-slate-900">{% if modo == "crear" %}Nuevo alumno{% else %}Editar alumno{% endif %}</h1>
+        </div>
+        <a href="{% url 'alumnos:alumno_list' %}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Volver</a>
+    </div>
+    <form method="post" class="grid gap-4 md:grid-cols-2">
+        {% csrf_token %}
+        {% include "alumnos/partials/form_fields.html" %}
+        <div class="md:col-span-2">
+            <button type="submit" class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Guardar</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

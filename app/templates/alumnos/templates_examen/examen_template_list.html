@@ -1,0 +1,55 @@
+{% extends "layouts/principal.html" %}
+
+{% block title %}Templates de examenes | TAEB{% endblock %}
+
+{% block contenido %}
+<section class="space-y-5">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <p class="text-sm font-semibold text-blue-600">Alumnos</p>
+            <h1 class="text-2xl font-bold text-slate-900">Templates de examenes</h1>
+        </div>
+        <a href="{% url 'alumnos:template_create' %}" class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Nuevo template</a>
+    </div>
+    <form method="get" class="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-4">
+        <select name="cinturon" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <option value="">Todos los cinturones</option>
+            {% for cinturon in cinturones %}
+            <option value="{{ cinturon.id }}" {% if filtros.cinturon == cinturon.id|stringformat:"s" %}selected{% endif %}>{{ cinturon.nombre }}</option>
+            {% endfor %}
+        </select>
+        <select name="activo" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <option value="">Todos los estados</option>
+            <option value="1" {% if filtros.activo == "1" %}selected{% endif %}>Activos</option>
+            <option value="0" {% if filtros.activo == "0" %}selected{% endif %}>Inactivos</option>
+        </select>
+        <select name="tipo_rango" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <option value="">GUP y DAN</option>
+            <option value="GUP" {% if filtros.tipo_rango == "GUP" %}selected{% endif %}>GUP</option>
+            <option value="DAN" {% if filtros.tipo_rango == "DAN" %}selected{% endif %}>DAN</option>
+        </select>
+        <button class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Filtrar</button>
+    </form>
+    <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500">
+                <tr><th class="px-4 py-3">Nombre</th><th class="px-4 py-3">Cinturon destino</th><th class="px-4 py-3">Version</th><th class="px-4 py-3">Activo</th><th class="px-4 py-3">Nota minima</th><th class="px-4 py-3">Acciones</th></tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for template in templates %}
+                <tr>
+                    <td class="px-4 py-3 font-medium text-slate-900">{{ template.nombre }}</td>
+                    <td class="px-4 py-3">{{ template.cinturon }}</td>
+                    <td class="px-4 py-3">{{ template.version }}</td>
+                    <td class="px-4 py-3">{% if template.activo %}Si{% else %}No{% endif %}</td>
+                    <td class="px-4 py-3">{{ template.nota_minima_aprobacion|default:"-" }}</td>
+                    <td class="px-4 py-3"><a class="text-blue-700 hover:underline" href="{% url 'alumnos:template_detail' template.pk %}">Ver</a> <a class="ml-2 text-slate-700 hover:underline" href="{% url 'alumnos:template_update' template.pk %}">Editar</a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="px-4 py-8 text-center text-slate-500">No hay templates para mostrar.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

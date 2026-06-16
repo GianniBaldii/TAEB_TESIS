@@ -1,0 +1,14 @@
+<div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+    <table class="min-w-full divide-y divide-slate-200 text-sm">
+        <thead class="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500">
+            <tr><th class="px-4 py-3">Cinturon</th><th class="px-4 py-3">Fecha de obtencion</th><th class="px-4 py-3">Examen asociado</th><th class="px-4 py-3">Observaciones</th></tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+            {% for item in historial %}
+            <tr><td class="px-4 py-3">{{ item.cinturon }}</td><td class="px-4 py-3">{{ item.fecha_obtencion|date:"d/m/Y" }}</td><td class="px-4 py-3">{{ item.examen|default:"-" }}</td><td class="px-4 py-3">{{ item.observaciones|default:"-" }}</td></tr>
+            {% empty %}
+            <tr><td colspan="4" class="px-4 py-8 text-center text-slate-500">Sin historial registrado.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,31 @@
+<div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+    <table class="min-w-full divide-y divide-slate-200 text-sm">
+        <thead class="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500">
+            <tr><th class="px-4 py-3">Fecha</th><th class="px-4 py-3">Origen</th><th class="px-4 py-3">Destino</th><th class="px-4 py-3">Estado</th><th class="px-4 py-3">Nota</th><th class="px-4 py-3">Resultado</th><th class="px-4 py-3">Lugar</th><th class="px-4 py-3">Acciones</th></tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+            {% for examen in examenes %}
+            <tr>
+                <td class="px-4 py-3">{{ examen.fecha_examen|date:"d/m/Y" }}</td>
+                <td class="px-4 py-3">{{ examen.cinturon_origen }}</td>
+                <td class="px-4 py-3">{{ examen.cinturon_destino }}</td>
+                <td class="px-4 py-3">{{ examen.get_estado_display }}</td>
+                <td class="px-4 py-3">{{ examen.nota_final|default:"-" }}</td>
+                <td class="px-4 py-3">{{ examen.resultado_final|default:"-" }}</td>
+                <td class="px-4 py-3">{{ examen.lugar|default:"-" }}</td>
+                <td class="px-4 py-3">
+                    <div class="flex flex-wrap gap-2">
+                        <a class="text-blue-700 hover:underline" href="{% url 'alumnos:examen_detail' alumno.pk examen.pk %}">Ver</a>
+                        <a class="text-slate-700 hover:underline" href="{% url 'alumnos:examen_evaluaciones' alumno.pk examen.pk %}">Evaluar</a>
+                        <form method="post" action="{% url 'alumnos:examen_aprobar' alumno.pk examen.pk %}">{% csrf_token %}<button class="text-green-700 hover:underline">Aprobar</button></form>
+                        <form method="post" action="{% url 'alumnos:examen_desaprobar' alumno.pk examen.pk %}">{% csrf_token %}<button class="text-amber-700 hover:underline">Desaprobar</button></form>
+                        <form method="post" action="{% url 'alumnos:examen_anular' alumno.pk examen.pk %}">{% csrf_token %}<button class="text-red-700 hover:underline">Anular</button></form>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="px-4 py-8 text-center text-slate-500">Este alumno no tiene examenes registrados.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

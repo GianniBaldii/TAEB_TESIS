@@ -1,0 +1,76 @@
+{% extends "layouts/principal.html" %}
+
+{% block title %}Alumnos | TAEB{% endblock %}
+
+{% block contenido %}
+<section class="space-y-5">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <p class="text-sm font-semibold text-blue-600">Alumnos</p>
+            <h1 class="text-2xl font-bold text-slate-900">Informacion de alumnos</h1>
+        </div>
+        <a href="{% url 'alumnos:alumno_create' %}" class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Nuevo alumno</a>
+    </div>
+
+    <form method="get" class="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-4">
+        <input name="q" value="{{ filtros.q }}" placeholder="Nombre, apellido o DNI" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+        <select name="activo" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <option value="">Todos los estados</option>
+            <option value="1" {% if filtros.activo == "1" %}selected{% endif %}>Activos</option>
+            <option value="0" {% if filtros.activo == "0" %}selected{% endif %}>Inactivos</option>
+        </select>
+        <select name="cinturon" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <option value="">Todos los cinturones</option>
+            {% for cinturon in cinturones %}
+                <option value="{{ cinturon.id }}" {% if filtros.cinturon == cinturon.id|stringformat:"s" %}selected{% endif %}>{{ cinturon.nombre }}</option>
+            {% endfor %}
+        </select>
+        <button class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Filtrar</button>
+    </form>
+
+    <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
+            <thead class="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500">
+                <tr>
+                    <th class="px-4 py-3">Apellido y nombre</th>
+                    <th class="px-4 py-3">DNI</th>
+                    <th class="px-4 py-3">Cinturon</th>
+                    <th class="px-4 py-3">Nacimiento</th>
+                    <th class="px-4 py-3">Peso</th>
+                    <th class="px-4 py-3">Altura</th>
+                    <th class="px-4 py-3">Telefono</th>
+                    <th class="px-4 py-3">Estado</th>
+                    <th class="px-4 py-3">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+                {% for alumno in alumnos %}
+                <tr>
+                    <td class="px-4 py-3 font-medium text-slate-900">{{ alumno.apellido }}, {{ alumno.nombre }}</td>
+                    <td class="px-4 py-3">{{ alumno.dni }}</td>
+                    <td class="px-4 py-3">{{ alumno.cinturon_actual|default:"-" }}</td>
+                    <td class="px-4 py-3">{{ alumno.fecha_nacimiento|date:"d/m/Y"|default:"-" }}</td>
+                    <td class="px-4 py-3">{{ alumno.peso_aproximado|default:"-" }}</td>
+                    <td class="px-4 py-3">{{ alumno.altura_aproximada|default:"-" }}</td>
+                    <td class="px-4 py-3">{{ alumno.telefono|default:"-" }}</td>
+                    <td class="px-4 py-3">{% if alumno.activo %}Activo{% else %}Inactivo{% endif %}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex flex-wrap gap-2">
+                            <a class="text-blue-700 hover:underline" href="{% url 'alumnos:alumno_detail' alumno.pk %}">Ficha</a>
+                            <a class="text-slate-700 hover:underline" href="{% url 'alumnos:alumno_update' alumno.pk %}">Editar</a>
+                            {% if alumno.activo %}
+                            <form method="post" action="{% url 'alumnos:alumno_baja' alumno.pk %}">{% csrf_token %}<button class="text-red-700 hover:underline">Baja</button></form>
+                            {% else %}
+                            <form method="post" action="{% url 'alumnos:alumno_reactivar' alumno.pk %}">{% csrf_token %}<button class="text-green-700 hover:underline">Reactivar</button></form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="9" class="px-4 py-8 text-center text-slate-500">No hay alumnos para mostrar.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

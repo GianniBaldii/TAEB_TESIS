@@ -1,0 +1,55 @@
+{% extends "layouts/principal.html" %}
+
+{% block title %}Evaluaciones | TAEB{% endblock %}
+
+{% block contenido %}
+<form method="post" class="space-y-5">
+    {% csrf_token %}
+    <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <p class="text-sm font-semibold text-blue-600">{{ alumno }}</p>
+        <h1 class="text-2xl font-bold text-slate-900">Cargar evaluaciones</h1>
+        <div class="mt-4 grid gap-4 md:grid-cols-3">
+            <div><label class="mb-1 block text-sm font-medium text-slate-700">Nota final</label><input name="nota_final" type="number" step="0.01" value="{{ examen.nota_final|default_if_none:'' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"></div>
+            <div><label class="mb-1 block text-sm font-medium text-slate-700">Resultado final</label><input name="resultado_final" value="{{ examen.resultado_final|default_if_none:'' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"></div>
+            <div><label class="mb-1 block text-sm font-medium text-slate-700">Observaciones</label><input name="observaciones" value="{{ examen.observaciones|default_if_none:'' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"></div>
+        </div>
+    </div>
+
+    {% regroup detalles by template_item.seccion as secciones %}
+    {% for seccion in secciones %}
+    <section class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 class="text-lg font-semibold text-slate-900">{{ seccion.grouper.nombre }}</h2>
+        <div class="mt-4 space-y-4">
+            {% for detalle in seccion.list %}
+            <div class="grid gap-3 rounded-lg border border-slate-200 p-4 md:grid-cols-3">
+                <div>
+                    <p class="font-medium text-slate-900">{{ detalle.template_item.nombre }}</p>
+                    <p class="text-sm text-slate-500">{{ detalle.template_item.get_tipo_evaluacion_display }}</p>
+                </div>
+                <div>
+                    {% if detalle.template_item.tipo_evaluacion == "NUMERICA" %}
+                    <input name="detalle_{{ detalle.pk }}_nota_numerica" type="number" step="0.01" value="{{ detalle.nota_numerica|default_if_none:'' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    {% elif detalle.template_item.tipo_evaluacion == "CONCEPTO" %}
+                    <input name="detalle_{{ detalle.pk }}_concepto" value="{{ detalle.concepto|default_if_none:'' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    {% elif detalle.template_item.tipo_evaluacion == "TEXTO" %}
+                    <textarea name="detalle_{{ detalle.pk }}_valor_texto" rows="2" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">{{ detalle.valor_texto|default_if_none:'' }}</textarea>
+                    {% elif detalle.template_item.tipo_evaluacion == "CHECK" %}
+                    <select name="detalle_{{ detalle.pk }}_aprobado" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                        <option value="">Sin evaluar</option>
+                        <option value="true" {% if detalle.aprobado is True %}selected{% endif %}>Aprobado</option>
+                        <option value="false" {% if detalle.aprobado is False %}selected{% endif %}>No aprobado</option>
+                    </select>
+                    {% endif %}
+                </div>
+                <div><input name="detalle_{{ detalle.pk }}_observaciones" value="{{ detalle.observaciones|default_if_none:'' }}" placeholder="Observaciones" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"></div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endfor %}
+    <div class="flex gap-2">
+        <button class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Guardar</button>
+        <a href="{% url 'alumnos:examen_detail' alumno.pk examen.pk %}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Volver</a>
+    </div>
+</form>
+{% endblock %}
