@@ -1,0 +1,9 @@
+<nav class="mb-4 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+    <a href="{% url 'alumnos:alumno_list' %}" class="font-medium text-slate-600 hover:text-blue-700">Alumnos</a>
+    <span>/</span>
+    <a href="{% url 'alumnos:alumno_detail' alumno.pk %}" class="font-medium text-slate-600 hover:text-blue-700">{{ alumno }}</a>
+    {% if examen %}
+    <span>/</span>
+    <span class="text-slate-900">Examen {{ examen.cinturon_destino }}</span>
+    {% endif %}
+</nav>

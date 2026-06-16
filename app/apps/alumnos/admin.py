@@ -111,9 +111,10 @@ class ExamenAdmin(admin.ModelAdmin):
         "cinturon_origen",
         "cinturon_destino",
         "estado",
+        "es_historico",
         "nota_final",
     )
-    list_filter = ("estado", "fecha_examen", "cinturon_destino")
+    list_filter = ("estado", "es_historico", "fecha_examen", "cinturon_destino")
     search_fields = ("alumno__nombre", "alumno__apellido", "alumno__dni", "lugar")
     autocomplete_fields = (
         "alumno",

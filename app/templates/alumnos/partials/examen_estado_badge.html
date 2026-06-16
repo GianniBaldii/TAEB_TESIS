@@ -1,0 +1,4 @@
+{% load alumno_tags %}
+<span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold {{ examen.estado|examen_estado_theme }}">
+    {{ examen.get_estado_display }}
+</span>

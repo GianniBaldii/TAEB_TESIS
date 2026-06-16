@@ -1,0 +1,31 @@
+{% load alumno_tags %}
+{% with theme=alumno.cinturon_actual|belt_theme %}
+<section class="overflow-hidden rounded-lg border shadow-sm {{ theme.container }}">
+    <div class="h-1.5 {{ theme.accent }}"></div>
+    <div class="p-6">
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+            <div class="min-w-0">
+                <p class="text-sm font-semibold opacity-80">Ficha del alumno</p>
+                <h1 class="mt-1 break-words text-2xl font-bold">{{ alumno.apellido }}, {{ alumno.nombre }}</h1>
+                <p class="mt-2 text-sm opacity-80">
+                    DNI {{ alumno.dni }} · {% if alumno.activo %}Activo{% else %}Inactivo{% endif %}
+                </p>
+                <div class="mt-4 flex flex-wrap items-center gap-2">
+                    {% include "alumnos/partials/belt_badge.html" with cinturon=alumno.cinturon_actual %}
+                    {% if alumno.peso_aproximado %}
+                    <span class="rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-xs font-semibold text-slate-700">Peso: {{ alumno.peso_aproximado }} kg</span>
+                    {% endif %}
+                    {% if alumno.altura_aproximada %}
+                    <span class="rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-xs font-semibold text-slate-700">Altura: {{ alumno.altura_aproximada }} m</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2 lg:justify-end">
+                <a href="{% url 'alumnos:alumno_update' alumno.pk %}" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Editar alumno</a>
+                <a href="{% url 'alumnos:examen_create' alumno.pk %}" class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800">Crear examen</a>
+                <a href="{% url 'alumnos:alumno_list' %}" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Volver al listado</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endwith %}

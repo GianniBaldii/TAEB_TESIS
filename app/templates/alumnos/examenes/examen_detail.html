@@ -3,19 +3,31 @@
 {% block title %}Detalle de examen | TAEB{% endblock %}
 
 {% block contenido %}
+{% include "alumnos/partials/examen_breadcrumb.html" %}
 <section class="space-y-5">
     <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
                 <p class="text-sm font-semibold text-blue-600">{{ alumno }}</p>
                 <h1 class="text-2xl font-bold text-slate-900">Examen a {{ examen.cinturon_destino }}</h1>
-                <p class="mt-1 text-sm text-slate-500">{{ examen.fecha_examen|date:"d/m/Y" }} · {{ examen.get_estado_display }}</p>
+                <div class="mt-2 flex flex-wrap items-center gap-2">
+                    {% include "alumnos/partials/examen_estado_badge.html" %}
+                    {% include "alumnos/partials/belt_badge.html" with cinturon=examen.cinturon_destino %}
+                    <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">{{ examen.fecha_examen|date:"d/m/Y" }}</span>
+                    <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">{% if examen.es_historico %}Historico{% else %}Actual{% endif %}</span>
+                </div>
             </div>
-            <a href="{% url 'alumnos:examen_evaluaciones' alumno.pk examen.pk %}" class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Cargar evaluaciones</a>
+            <div class="flex flex-wrap gap-2">
+                <a href="{% url 'alumnos:alumno_detail' alumno.pk %}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Volver a la ficha</a>
+                {% if examen.estado == "PENDIENTE" %}
+                <a href="{% url 'alumnos:examen_evaluaciones' alumno.pk examen.pk %}" class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Cargar evaluaciones</a>
+                {% endif %}
+            </div>
         </div>
         <dl class="mt-6 grid gap-4 md:grid-cols-3">
             <div><dt class="text-sm text-slate-500">Origen</dt><dd class="font-medium text-slate-900">{{ examen.cinturon_origen }}</dd></div>
             <div><dt class="text-sm text-slate-500">Template</dt><dd class="font-medium text-slate-900">{{ examen.examen_template }}</dd></div>
+            <div><dt class="text-sm text-slate-500">Tipo</dt><dd class="font-medium text-slate-900">{% if examen.es_historico %}Historico{% else %}Actual{% endif %}</dd></div>
             <div><dt class="text-sm text-slate-500">Lugar</dt><dd class="font-medium text-slate-900">{{ examen.lugar|default:"-" }}</dd></div>
             <div><dt class="text-sm text-slate-500">Nota final</dt><dd class="font-medium text-slate-900">{{ examen.nota_final|default:"-" }}</dd></div>
             <div><dt class="text-sm text-slate-500">Resultado</dt><dd class="font-medium text-slate-900">{{ examen.resultado_final|default:"-" }}</dd></div>

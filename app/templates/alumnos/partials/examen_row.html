@@ -1,0 +1,21 @@
+<tr>
+    <td class="px-4 py-3">{{ examen.fecha_examen|date:"d/m/Y" }}</td>
+    <td class="px-4 py-3">{{ examen.cinturon_origen }}</td>
+    <td class="px-4 py-3">{% include "alumnos/partials/belt_badge.html" with cinturon=examen.cinturon_destino %}</td>
+    <td class="px-4 py-3">{% if examen.es_historico %}Historico{% else %}Actual{% endif %}</td>
+    <td class="px-4 py-3">{% include "alumnos/partials/examen_estado_badge.html" %}</td>
+    <td class="px-4 py-3">{{ examen.nota_final|default:"-" }}</td>
+    <td class="px-4 py-3">{{ examen.resultado_final|default:"-" }}</td>
+    <td class="px-4 py-3">{{ examen.lugar|default:"-" }}</td>
+    <td class="px-4 py-3">
+        <div class="flex flex-wrap gap-2">
+            <a class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-50" href="{% url 'alumnos:examen_detail' alumno.pk examen.pk %}">Ver</a>
+            {% if examen.estado == "PENDIENTE" %}
+            <a class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50" href="{% url 'alumnos:examen_evaluaciones' alumno.pk examen.pk %}">Evaluar</a>
+            <form method="post" action="{% url 'alumnos:examen_aprobar' alumno.pk examen.pk %}">{% csrf_token %}<button class="rounded-md border border-green-200 px-2.5 py-1 text-xs font-semibold text-green-700 hover:bg-green-50">Aprobar</button></form>
+            <form method="post" action="{% url 'alumnos:examen_desaprobar' alumno.pk examen.pk %}">{% csrf_token %}<button class="rounded-md border border-amber-200 px-2.5 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-50">Desaprobar</button></form>
+            <form method="post" action="{% url 'alumnos:examen_anular' alumno.pk examen.pk %}">{% csrf_token %}<button class="rounded-md border border-red-200 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-50">Anular</button></form>
+            {% endif %}
+        </div>
+    </td>
+</tr>

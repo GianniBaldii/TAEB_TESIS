@@ -29,7 +29,7 @@ def _alumno_queryset():
 
 def _examen_queryset(alumno):
     return Examen.objects.filter(alumno=alumno).select_related(
-        "examen_template", "cinturon_origen", "cinturon_destino"
+        "alumno", "examen_template", "cinturon_origen", "cinturon_destino"
     )
 
 
@@ -91,7 +91,7 @@ def alumno_update(request, pk):
 @login_required
 def alumno_detail(request, pk):
     alumno = get_object_or_404(_alumno_queryset(), pk=pk)
-    examenes = _examen_queryset(alumno)
+    examenes = _examen_queryset(alumno).exclude(estado=Examen.Estado.ANULADO)
     historial = alumno.historial_cinturones.select_related("cinturon", "examen")
     return render(
         request,
@@ -133,7 +133,9 @@ def examen_create(request, alumno_id):
                 alumno=alumno,
                 fecha_examen=form.cleaned_data["fecha_examen"],
                 lugar=form.cleaned_data["lugar"],
+                cinturon_origen=form.cleaned_data["cinturon_origen"],
                 cinturon_destino=form.cleaned_data["cinturon_destino"],
+                es_historico=form.cleaned_data["es_historico"],
             )
         except AlumnosError as exc:
             messages.error(request, str(exc))
@@ -169,6 +171,12 @@ def examen_detail(request, alumno_id, examen_id):
 @login_required
 def examen_evaluaciones(request, alumno_id, examen_id):
     alumno, examen = _obtener_examen(alumno_id, examen_id)
+    if examen_alumno_service.examen_tiene_estado_final(examen):
+        messages.error(
+            request,
+            "No se pueden editar evaluaciones de un examen con estado final.",
+        )
+        return redirect("alumnos:examen_detail", alumno_id=alumno.pk, examen_id=examen.pk)
     detalles = examen.detalles.select_related("template_item", "template_item__seccion")
     if request.method == "POST":
         data = {"detalles": {}}
@@ -185,8 +193,12 @@ def examen_evaluaciones(request, alumno_id, examen_id):
         data["nota_final"] = request.POST.get("nota_final")
         data["resultado_final"] = request.POST.get("resultado_final")
         data["observaciones"] = request.POST.get("observaciones")
-        examen_alumno_service.actualizar_evaluaciones_examen(examen, data)
-        messages.success(request, "Evaluaciones guardadas correctamente.")
+        try:
+            examen_alumno_service.actualizar_evaluaciones_examen(examen, data)
+        except AlumnosError as exc:
+            messages.error(request, str(exc))
+        else:
+            messages.success(request, "Evaluaciones guardadas correctamente.")
         return redirect("alumnos:examen_detail", alumno_id=alumno.pk, examen_id=examen.pk)
     return render(
         request,
@@ -225,8 +237,12 @@ def examen_desaprobar(request, alumno_id, examen_id):
 def examen_anular(request, alumno_id, examen_id):
     alumno, examen = _obtener_examen(alumno_id, examen_id)
     if request.method == "POST":
-        examen_alumno_service.anular_examen(examen)
-        messages.success(request, "Examen anulado correctamente.")
+        try:
+            examen_alumno_service.anular_examen(examen)
+        except AlumnosError as exc:
+            messages.error(request, str(exc))
+        else:
+            messages.success(request, "Examen anulado correctamente.")
     return redirect("alumnos:alumno_detail", pk=alumno.pk)
 
 

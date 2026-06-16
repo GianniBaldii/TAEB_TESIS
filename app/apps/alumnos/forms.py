@@ -86,6 +86,18 @@ class ExamenTemplateItemForm(TailwindModelForm):
 class CrearExamenForm(forms.Form):
     fecha_examen = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
     lugar = forms.CharField(max_length=150, required=False)
+    es_historico = forms.BooleanField(
+        required=False,
+        label="Carga historica",
+        help_text=(
+            "Usar para examenes ya rendidos antes de cargar el alumno en TAEB."
+        ),
+    )
+    cinturon_origen = forms.ModelChoiceField(
+        queryset=Cinturon.objects.filter(activo=True),
+        required=False,
+        label="Cinturon origen",
+    )
     cinturon_destino = forms.ModelChoiceField(
         queryset=Cinturon.objects.filter(activo=True),
         required=False,

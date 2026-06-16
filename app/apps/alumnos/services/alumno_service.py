@@ -82,8 +82,14 @@ def obtener_progreso_alumno(alumno):
 @transaction.atomic
 def registrar_cambio_cinturon_por_examen(examen):
     alumno = examen.alumno
-    alumno.cinturon_actual = examen.cinturon_destino
-    alumno.save(update_fields=["cinturon_actual", "fecha_modificacion"])
+    debe_actualizar_cinturon = (
+        not alumno.cinturon_actual
+        or examen.cinturon_destino.orden > alumno.cinturon_actual.orden
+        or not examen.es_historico
+    )
+    if debe_actualizar_cinturon:
+        alumno.cinturon_actual = examen.cinturon_destino
+        alumno.save(update_fields=["cinturon_actual", "fecha_modificacion"])
     historial, _ = AlumnoCinturonHistorial.objects.get_or_create(
         alumno=alumno,
         cinturon=examen.cinturon_destino,

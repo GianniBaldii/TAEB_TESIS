@@ -27,6 +27,7 @@ class Examen(models.Model):
     )
     fecha_examen = models.DateField()
     lugar = models.CharField(max_length=150, null=True, blank=True)
+    es_historico = models.BooleanField(default=False)
     estado = models.CharField(
         max_length=12, choices=Estado.choices, default=Estado.PENDIENTE
     )

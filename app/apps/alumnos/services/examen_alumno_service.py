@@ -8,15 +8,47 @@ from . import alumno_service, examen_template_service
 from .excepciones import AlumnosError
 
 
+ESTADOS_FINALES = {
+    Examen.Estado.APROBADO,
+    Examen.Estado.DESAPROBADO,
+    Examen.Estado.AUSENTE,
+    Examen.Estado.ANULADO,
+}
+
+
+def examen_tiene_estado_final(examen):
+    return examen.estado in ESTADOS_FINALES
+
+
+def validar_examen_pendiente(examen, accion):
+    if examen_tiene_estado_final(examen):
+        raise AlumnosError(
+            f"No se puede {accion} un examen con estado final "
+            f"{examen.get_estado_display()}."
+        )
+    return True
+
+
 @transaction.atomic
-def crear_examen_para_alumno(alumno, fecha_examen, lugar=None, cinturon_destino=None):
-    cinturon_origen = alumno.cinturon_actual
+def crear_examen_para_alumno(
+    alumno,
+    fecha_examen,
+    lugar=None,
+    cinturon_origen=None,
+    cinturon_destino=None,
+    es_historico=False,
+):
+    cinturon_origen = cinturon_origen or alumno.cinturon_actual
     if not cinturon_origen:
-        raise AlumnosError("El alumno debe tener un cinturon actual para crear un examen.")
+        raise AlumnosError(
+            "El alumno debe tener un cinturon origen para crear un examen."
+        )
     if cinturon_destino is None:
         cinturon_destino = alumno_service.obtener_siguiente_cinturon(cinturon_origen)
     if not cinturon_destino:
         raise AlumnosError("No existe un siguiente cinturon activo para el alumno.")
+    if cinturon_destino.orden <= cinturon_origen.orden:
+        raise AlumnosError("El cinturon destino debe ser posterior al cinturon origen.")
 
     template = examen_template_service.obtener_template_activo_para_cinturon(
         cinturon_destino
@@ -28,6 +60,7 @@ def crear_examen_para_alumno(alumno, fecha_examen, lugar=None, cinturon_destino=
         cinturon_destino=cinturon_destino,
         fecha_examen=fecha_examen,
         lugar=lugar,
+        es_historico=es_historico,
         estado=Examen.Estado.PENDIENTE,
     )
     generar_detalles_desde_template(examen)
@@ -56,6 +89,7 @@ def generar_detalles_desde_template(examen):
 
 
 def actualizar_evaluaciones_examen(examen, evaluaciones_data):
+    validar_examen_pendiente(examen, "editar")
     detalles_data = evaluaciones_data.get("detalles", {})
     for detalle in examen.detalles.select_related("template_item"):
         data = detalles_data.get(detalle.pk) or detalles_data.get(str(detalle.pk))
@@ -115,9 +149,9 @@ def validar_items_obligatorios_evaluados(examen):
 
 @transaction.atomic
 def aprobar_examen(examen):
-    if examen.estado == Examen.Estado.ANULADO:
-        raise AlumnosError("No se puede aprobar un examen anulado.")
-    validar_items_obligatorios_evaluados(examen)
+    validar_examen_pendiente(examen, "aprobar")
+    if not examen.es_historico:
+        validar_items_obligatorios_evaluados(examen)
     examen.estado = Examen.Estado.APROBADO
     examen.save(update_fields=["estado", "fecha_modificacion"])
     alumno_service.registrar_cambio_cinturon_por_examen(examen)
@@ -125,14 +159,14 @@ def aprobar_examen(examen):
 
 
 def desaprobar_examen(examen):
-    if examen.estado == Examen.Estado.ANULADO:
-        raise AlumnosError("No se puede desaprobar un examen anulado.")
+    validar_examen_pendiente(examen, "desaprobar")
     examen.estado = Examen.Estado.DESAPROBADO
     examen.save(update_fields=["estado", "fecha_modificacion"])
     return examen
 
 
 def anular_examen(examen):
+    validar_examen_pendiente(examen, "anular")
     examen.estado = Examen.Estado.ANULADO
     examen.save(update_fields=["estado", "fecha_modificacion"])
     return examen
