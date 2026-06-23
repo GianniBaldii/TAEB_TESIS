@@ -9,9 +9,37 @@
         <p class="text-sm font-semibold text-blue-600">{{ alumno }}</p>
         <h1 class="text-2xl font-bold text-slate-900">Crear examen</h1>
     </div>
-    <form method="post" class="grid gap-4 md:grid-cols-2">
+    <form method="post" class="grid gap-4 md:grid-cols-2" x-data="{ historico: {{ form.es_historico.value|yesno:'true,false' }} }">
         {% csrf_token %}
-        {% include "alumnos/partials/form_fields.html" %}
+        <div>
+            <label for="{{ form.fecha_examen.id_for_label }}" class="mb-1 block text-sm font-medium text-slate-700">Fecha de examen</label>
+            {{ form.fecha_examen }}
+            {% for error in form.fecha_examen.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}
+        </div>
+        <div>
+            <label for="{{ form.lugar.id_for_label }}" class="mb-1 block text-sm font-medium text-slate-700">Lugar</label>
+            {{ form.lugar }}
+            {% for error in form.lugar.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}
+        </div>
+        <label class="md:col-span-2 flex cursor-pointer items-center justify-between gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <span><span class="block text-sm font-semibold text-slate-800">Registrar como examen histórico</span><span class="text-sm text-slate-500">Usar para exámenes rendidos antes de cargar el alumno en TAEB.</span></span>
+            <span class="relative inline-flex shrink-0 items-center">
+                <input type="checkbox" name="{{ form.es_historico.html_name }}" id="{{ form.es_historico.id_for_label }}" x-model="historico" class="peer sr-only" {% if form.es_historico.value %}checked{% endif %}>
+                <span class="h-6 w-11 rounded-full bg-slate-300 transition peer-checked:bg-blue-700 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500 peer-focus-visible:ring-offset-2"></span>
+                <span class="pointer-events-none absolute left-1 h-4 w-4 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5"></span>
+            </span>
+        </label>
+        <div x-show="!historico" class="md:col-span-2 grid gap-4 md:grid-cols-2">
+            <div class="rounded-lg border border-blue-100 bg-blue-50 p-4"><p class="text-xs font-semibold uppercase tracking-wide text-blue-700">Cinturón actual</p><p class="mt-1 font-semibold text-slate-900">{{ alumno.cinturon_actual|default:'Sin cinturón asignado' }}</p></div>
+            <div class="rounded-lg border border-emerald-100 bg-emerald-50 p-4"><p class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Cinturón a rendir</p><p class="mt-1 font-semibold text-slate-900">{{ proximo_cinturon|default:'No hay siguiente cinturón disponible' }}</p></div>
+        </div>
+        <div x-cloak x-show="historico" class="md:col-span-2 rounded-lg border border-amber-200 bg-amber-50 p-4">
+            <label for="{{ form.cinturon_destino.id_for_label }}" class="mb-1 block text-sm font-medium text-slate-700">Cinturón destino</label>
+            {{ form.cinturon_destino }}
+            {% for error in form.cinturon_destino.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}
+            <p class="mt-2 text-sm text-slate-600">El cinturón origen se calculará automáticamente según el orden de graduación.</p>
+        </div>
+        {% for error in form.non_field_errors %}<p class="md:col-span-2 text-sm text-red-600">{{ error }}</p>{% endfor %}
         <div class="md:col-span-2 flex gap-2">
             <button class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Crear</button>
             <a href="{% url 'alumnos:alumno_detail' alumno.pk %}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Volver a la ficha</a>

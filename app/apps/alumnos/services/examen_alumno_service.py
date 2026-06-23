@@ -2,7 +2,7 @@ from decimal import Decimal
 
 from django.db import transaction
 
-from apps.alumnos.models import Examen, ExamenDetalle, ExamenTemplateItem
+from apps.alumnos.models import Alumno, Examen, ExamenDetalle, ExamenTemplateItem
 
 from . import alumno_service, examen_template_service
 from .excepciones import AlumnosError
@@ -14,6 +14,60 @@ ESTADOS_FINALES = {
     Examen.Estado.AUSENTE,
     Examen.Estado.ANULADO,
 }
+
+CONCEPTOS_GUP_VALIDOS = (
+    "NAN-", "NAN", "NAN+", "AN-", "AN", "AN+", "SN-", "SN", "SN+",
+)
+
+
+def validar_puede_crear_examen_actual(alumno, cinturon_destino):
+    if Examen.objects.filter(
+        alumno=alumno,
+        es_historico=False,
+        estado=Examen.Estado.PENDIENTE,
+    ).exists():
+        raise AlumnosError(
+            "El alumno ya tiene un examen pendiente. Primero debe resolverlo, "
+            "desaprobarlo o anularlo."
+        )
+    if Examen.objects.filter(
+        alumno=alumno,
+        cinturon_destino=cinturon_destino,
+        estado=Examen.Estado.APROBADO,
+    ).exists():
+        raise AlumnosError("El alumno ya aprobó un examen para este cinturón.")
+
+
+def validar_examen_historico_duplicado(alumno, cinturon_destino, fecha_examen):
+    if Examen.objects.filter(
+        alumno=alumno,
+        cinturon_destino=cinturon_destino,
+        fecha_examen=fecha_examen,
+        es_historico=True,
+    ).exists():
+        raise AlumnosError(
+            "Ya existe un examen histórico para este alumno, cinturón y fecha."
+        )
+
+
+def validar_cinturon_destino_rendible(cinturon_destino):
+    cinturon_inicial = alumno_service.obtener_cinturon_inicial()
+    if cinturon_inicial and cinturon_destino.pk == cinturon_inicial.pk:
+        raise AlumnosError(
+            "El cinturón inicial no puede ser destino de un examen; se asigna al "
+            "comenzar Taekwondo."
+        )
+
+
+def _validar_concepto_gup(examen, concepto):
+    if (
+        examen.cinturon_destino.tipo_rango == "GUP"
+        and concepto
+        and concepto not in CONCEPTOS_GUP_VALIDOS
+    ):
+        raise AlumnosError(
+            "El concepto indicado no es válido para un examen GUP."
+        )
 
 
 def examen_tiene_estado_final(examen):
@@ -34,17 +88,32 @@ def crear_examen_para_alumno(
     alumno,
     fecha_examen,
     lugar=None,
-    cinturon_origen=None,
     cinturon_destino=None,
     es_historico=False,
 ):
-    cinturon_origen = cinturon_origen or alumno.cinturon_actual
-    if not cinturon_origen:
-        raise AlumnosError(
-            "El alumno debe tener un cinturon origen para crear un examen."
-        )
-    if cinturon_destino is None:
+    # Bloqueamos al alumno para que dos solicitudes simultáneas no creen pendientes.
+    alumno = Alumno.objects.select_for_update().select_related("cinturon_actual").get(
+        pk=alumno.pk
+    )
+    if es_historico:
+        if not cinturon_destino:
+            raise AlumnosError("Seleccione un cinturón destino para el examen histórico.")
+        validar_cinturon_destino_rendible(cinturon_destino)
+        cinturon_origen = alumno_service.obtener_cinturon_anterior(cinturon_destino)
+        if not cinturon_origen:
+            raise AlumnosError(
+                "No se puede determinar el cinturón origen para el destino seleccionado."
+            )
+        validar_examen_historico_duplicado(alumno, cinturon_destino, fecha_examen)
+    else:
+        cinturon_origen = alumno.cinturon_actual
+        if not cinturon_origen:
+            raise AlumnosError("El alumno debe tener un cinturón actual para crear un examen.")
         cinturon_destino = alumno_service.obtener_siguiente_cinturon(cinturon_origen)
+        if not cinturon_destino:
+            raise AlumnosError("No existe un siguiente cinturón activo para el alumno.")
+        validar_cinturon_destino_rendible(cinturon_destino)
+        validar_puede_crear_examen_actual(alumno, cinturon_destino)
     if not cinturon_destino:
         raise AlumnosError("No existe un siguiente cinturon activo para el alumno.")
     if cinturon_destino.orden <= cinturon_origen.orden:
@@ -99,7 +168,9 @@ def actualizar_evaluaciones_examen(examen, evaluaciones_data):
         if tipo == ExamenTemplateItem.TipoEvaluacion.NUMERICA:
             detalle.nota_numerica = data.get("nota_numerica") or None
         elif tipo == ExamenTemplateItem.TipoEvaluacion.CONCEPTO:
-            detalle.concepto = data.get("concepto") or None
+            concepto = data.get("concepto") or None
+            _validar_concepto_gup(examen, concepto)
+            detalle.concepto = concepto
         elif tipo == ExamenTemplateItem.TipoEvaluacion.TEXTO:
             detalle.valor_texto = data.get("valor_texto") or None
         elif tipo == ExamenTemplateItem.TipoEvaluacion.CHECK:
@@ -113,6 +184,7 @@ def actualizar_evaluaciones_examen(examen, evaluaciones_data):
         detalle.observaciones = data.get("observaciones") or None
         detalle.save()
 
+    _validar_concepto_gup(examen, evaluaciones_data.get("resultado_final"))
     for campo in ("nota_final", "resultado_final", "observaciones"):
         if campo in evaluaciones_data:
             setattr(examen, campo, evaluaciones_data.get(campo) or None)

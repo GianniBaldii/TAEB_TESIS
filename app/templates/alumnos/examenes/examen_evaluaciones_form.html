@@ -20,7 +20,7 @@
         </div>
         <div class="mt-4 grid gap-4 md:grid-cols-3">
             <div><label class="mb-1 block text-sm font-medium text-slate-700">Nota final</label><input name="nota_final" type="number" step="0.01" value="{{ examen.nota_final|default_if_none:'' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"></div>
-            <div><label class="mb-1 block text-sm font-medium text-slate-700">Resultado final</label><input name="resultado_final" value="{{ examen.resultado_final|default_if_none:'' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"></div>
+            <div><label class="mb-1 block text-sm font-medium text-slate-700">Resultado final</label>{% if examen.cinturon_destino.tipo_rango == "GUP" %}<select name="resultado_final" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"><option value="">Sin evaluar</option>{% for concepto in conceptos_gup_validos %}<option value="{{ concepto }}" {% if examen.resultado_final == concepto %}selected{% endif %}>{{ concepto }}</option>{% endfor %}</select>{% else %}<input name="resultado_final" value="{{ examen.resultado_final|default_if_none:'' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">{% endif %}</div>
             <div><label class="mb-1 block text-sm font-medium text-slate-700">Observaciones</label><input name="observaciones" value="{{ examen.observaciones|default_if_none:'' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"></div>
         </div>
     </div>
@@ -39,6 +39,8 @@
                 <div>
                     {% if detalle.template_item.tipo_evaluacion == "NUMERICA" %}
                     <input name="detalle_{{ detalle.pk }}_nota_numerica" type="number" step="0.01" value="{{ detalle.nota_numerica|default_if_none:'' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    {% elif detalle.template_item.tipo_evaluacion == "CONCEPTO" and examen.cinturon_destino.tipo_rango == "GUP" %}
+                    <select name="detalle_{{ detalle.pk }}_concepto" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"><option value="">Sin evaluar</option>{% for concepto in conceptos_gup_validos %}<option value="{{ concepto }}" {% if detalle.concepto == concepto %}selected{% endif %}>{{ concepto }}</option>{% endfor %}</select>
                     {% elif detalle.template_item.tipo_evaluacion == "CONCEPTO" %}
                     <input name="detalle_{{ detalle.pk }}_concepto" value="{{ detalle.concepto|default_if_none:'' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
                     {% elif detalle.template_item.tipo_evaluacion == "TEXTO" %}

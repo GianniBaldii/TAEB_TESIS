@@ -1,0 +1,14 @@
+{% if messages %}
+{% for message in messages %}
+{% if "validation_error" in message.tags %}
+<div x-data="{ abierto: true }" x-show="abierto" x-cloak @keydown.escape.window="abierto = false" class="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="titulo-error">
+    <div class="absolute inset-0 bg-slate-950/60" @click="abierto = false" aria-hidden="true"></div>
+    <div class="relative w-full max-w-md rounded-xl bg-white p-6 shadow-2xl" @click.stop>
+        <button type="button" @click="abierto = false" class="absolute right-4 top-4 rounded p-1 text-slate-500 hover:bg-slate-100" aria-label="Cerrar">&#215;</button>
+        <div class="flex gap-4"><div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-xl font-bold text-red-700" aria-hidden="true">!</div><div><h2 id="titulo-error" class="text-lg font-bold text-slate-900">No se pudo completar la acción</h2><p class="mt-2 text-sm leading-6 text-slate-600">{{ message }}</p></div></div>
+        <div class="mt-6 flex justify-end"><button type="button" x-ref="entendido" x-init="$nextTick(() => $refs.entendido.focus())" @click="abierto = false" class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Entendido</button></div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+{% endif %}

@@ -23,6 +23,10 @@ from .services import alumno_service, examen_alumno_service, examen_template_ser
 from .services.excepciones import AlumnosError
 
 
+def _mensaje_error_validacion(request, error):
+    messages.error(request, str(error), extra_tags="validation_error")
+
+
 def _alumno_queryset():
     return Alumno.objects.select_related("cinturon_actual")
 
@@ -133,12 +137,11 @@ def examen_create(request, alumno_id):
                 alumno=alumno,
                 fecha_examen=form.cleaned_data["fecha_examen"],
                 lugar=form.cleaned_data["lugar"],
-                cinturon_origen=form.cleaned_data["cinturon_origen"],
                 cinturon_destino=form.cleaned_data["cinturon_destino"],
                 es_historico=form.cleaned_data["es_historico"],
             )
         except AlumnosError as exc:
-            messages.error(request, str(exc))
+            _mensaje_error_validacion(request, exc)
         else:
             messages.success(request, "Examen creado correctamente.")
             return redirect(
@@ -147,7 +150,13 @@ def examen_create(request, alumno_id):
     return render(
         request,
         "alumnos/examenes/examen_form.html",
-        {"form": form, "alumno": alumno},
+        {
+            "form": form,
+            "alumno": alumno,
+            "proximo_cinturon": alumno_service.obtener_siguiente_cinturon(
+                alumno.cinturon_actual
+            ),
+        },
     )
 
 
@@ -172,7 +181,7 @@ def examen_detail(request, alumno_id, examen_id):
 def examen_evaluaciones(request, alumno_id, examen_id):
     alumno, examen = _obtener_examen(alumno_id, examen_id)
     if examen_alumno_service.examen_tiene_estado_final(examen):
-        messages.error(
+        _mensaje_error_validacion(
             request,
             "No se pueden editar evaluaciones de un examen con estado final.",
         )
@@ -196,14 +205,19 @@ def examen_evaluaciones(request, alumno_id, examen_id):
         try:
             examen_alumno_service.actualizar_evaluaciones_examen(examen, data)
         except AlumnosError as exc:
-            messages.error(request, str(exc))
+            _mensaje_error_validacion(request, exc)
         else:
             messages.success(request, "Evaluaciones guardadas correctamente.")
         return redirect("alumnos:examen_detail", alumno_id=alumno.pk, examen_id=examen.pk)
     return render(
         request,
         "alumnos/examenes/examen_evaluaciones_form.html",
-        {"alumno": alumno, "examen": examen, "detalles": detalles},
+        {
+            "alumno": alumno,
+            "examen": examen,
+            "detalles": detalles,
+            "conceptos_gup_validos": examen_alumno_service.CONCEPTOS_GUP_VALIDOS,
+        },
     )
 
 
@@ -214,7 +228,7 @@ def examen_aprobar(request, alumno_id, examen_id):
         try:
             examen_alumno_service.aprobar_examen(examen)
         except AlumnosError as exc:
-            messages.error(request, str(exc))
+            _mensaje_error_validacion(request, exc)
         else:
             messages.success(request, "Examen aprobado correctamente.")
     return redirect("alumnos:alumno_detail", pk=alumno.pk)
@@ -227,7 +241,7 @@ def examen_desaprobar(request, alumno_id, examen_id):
         try:
             examen_alumno_service.desaprobar_examen(examen)
         except AlumnosError as exc:
-            messages.error(request, str(exc))
+            _mensaje_error_validacion(request, exc)
         else:
             messages.success(request, "Examen desaprobado correctamente.")
     return redirect("alumnos:alumno_detail", pk=alumno.pk)
@@ -240,7 +254,7 @@ def examen_anular(request, alumno_id, examen_id):
         try:
             examen_alumno_service.anular_examen(examen)
         except AlumnosError as exc:
-            messages.error(request, str(exc))
+            _mensaje_error_validacion(request, exc)
         else:
             messages.success(request, "Examen anulado correctamente.")
     return redirect("alumnos:alumno_detail", pk=alumno.pk)
@@ -292,14 +306,28 @@ def template_update(request, pk):
     template = get_object_or_404(ExamenTemplate.objects.select_related("cinturon"), pk=pk)
     form = ExamenTemplateForm(request.POST or None, instance=template)
     if request.method == "POST" and form.is_valid():
-        examen_template_service.actualizar_template(template, form.cleaned_data)
-        messages.success(request, "Template actualizado correctamente.")
-        return redirect("alumnos:template_detail", pk=template.pk)
+        try:
+            examen_template_service.actualizar_template(template, form.cleaned_data)
+        except AlumnosError as exc:
+            _mensaje_error_validacion(request, exc)
+        else:
+            messages.success(request, "Template actualizado correctamente.")
+            return redirect("alumnos:template_detail", pk=template.pk)
     return render(
         request,
         "alumnos/templates_examen/examen_template_form.html",
         {"form": form, "template_examen": template, "modo": "editar"},
     )
+
+
+@login_required
+def template_duplicar(request, pk):
+    template = get_object_or_404(ExamenTemplate, pk=pk)
+    if request.method == "POST":
+        nuevo_template = examen_template_service.duplicar_template(template)
+        messages.success(request, "Nueva versión del template creada correctamente.")
+        return redirect("alumnos:template_detail", pk=nuevo_template.pk)
+    return redirect("alumnos:template_detail", pk=template.pk)
 
 
 @login_required
@@ -321,7 +349,12 @@ def template_detail(request, pk):
     return render(
         request,
         "alumnos/templates_examen/examen_template_detail.html",
-        {"template_examen": template},
+        {
+            "template_examen": template,
+            "template_bloqueado": examen_template_service.template_tiene_examenes_asociados(
+                template
+            ),
+        },
     )
 
 
@@ -344,13 +377,30 @@ def template_desactivar(request, pk):
 
 
 @login_required
+def template_eliminar(request, pk):
+    template = get_object_or_404(ExamenTemplate, pk=pk)
+    if request.method == "POST":
+        try:
+            examen_template_service.eliminar_template(template)
+        except AlumnosError as exc:
+            _mensaje_error_validacion(request, exc)
+            return redirect("alumnos:template_detail", pk=template.pk)
+        messages.success(request, "Template eliminado correctamente.")
+    return redirect("alumnos:template_list")
+
+
+@login_required
 def seccion_create(request, template_id):
     template = get_object_or_404(ExamenTemplate, pk=template_id)
     form = ExamenTemplateSeccionForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        examen_template_service.crear_seccion(template, form.cleaned_data)
-        messages.success(request, "Seccion creada correctamente.")
-        return redirect("alumnos:template_detail", pk=template.pk)
+        try:
+            examen_template_service.crear_seccion(template, form.cleaned_data)
+        except AlumnosError as exc:
+            _mensaje_error_validacion(request, exc)
+        else:
+            messages.success(request, "Seccion creada correctamente.")
+            return redirect("alumnos:template_detail", pk=template.pk)
     return render(
         request,
         "alumnos/templates_examen/seccion_form.html",
@@ -363,9 +413,13 @@ def seccion_update(request, seccion_id):
     seccion = get_object_or_404(ExamenTemplateSeccion.objects.select_related("examen_template"), pk=seccion_id)
     form = ExamenTemplateSeccionForm(request.POST or None, instance=seccion)
     if request.method == "POST" and form.is_valid():
-        examen_template_service.actualizar_seccion(seccion, form.cleaned_data)
-        messages.success(request, "Seccion actualizada correctamente.")
-        return redirect("alumnos:template_detail", pk=seccion.examen_template_id)
+        try:
+            examen_template_service.actualizar_seccion(seccion, form.cleaned_data)
+        except AlumnosError as exc:
+            _mensaje_error_validacion(request, exc)
+        else:
+            messages.success(request, "Seccion actualizada correctamente.")
+            return redirect("alumnos:template_detail", pk=seccion.examen_template_id)
     return render(
         request,
         "alumnos/templates_examen/seccion_form.html",
@@ -377,8 +431,12 @@ def seccion_update(request, seccion_id):
 def seccion_desactivar(request, seccion_id):
     seccion = get_object_or_404(ExamenTemplateSeccion, pk=seccion_id)
     if request.method == "POST":
-        examen_template_service.desactivar_seccion(seccion)
-        messages.success(request, "Seccion desactivada correctamente.")
+        try:
+            examen_template_service.desactivar_seccion(seccion)
+        except AlumnosError as exc:
+            _mensaje_error_validacion(request, exc)
+        else:
+            messages.success(request, "Seccion desactivada correctamente.")
     return redirect("alumnos:template_detail", pk=seccion.examen_template_id)
 
 
@@ -387,9 +445,13 @@ def item_create(request, seccion_id):
     seccion = get_object_or_404(ExamenTemplateSeccion.objects.select_related("examen_template"), pk=seccion_id)
     form = ExamenTemplateItemForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        examen_template_service.crear_item(seccion, form.cleaned_data)
-        messages.success(request, "Item creado correctamente.")
-        return redirect("alumnos:template_detail", pk=seccion.examen_template_id)
+        try:
+            examen_template_service.crear_item(seccion, form.cleaned_data)
+        except AlumnosError as exc:
+            _mensaje_error_validacion(request, exc)
+        else:
+            messages.success(request, "Item creado correctamente.")
+            return redirect("alumnos:template_detail", pk=seccion.examen_template_id)
     return render(
         request,
         "alumnos/templates_examen/item_form.html",
@@ -405,9 +467,13 @@ def item_update(request, item_id):
     )
     form = ExamenTemplateItemForm(request.POST or None, instance=item)
     if request.method == "POST" and form.is_valid():
-        examen_template_service.actualizar_item(item, form.cleaned_data)
-        messages.success(request, "Item actualizado correctamente.")
-        return redirect("alumnos:template_detail", pk=item.seccion.examen_template_id)
+        try:
+            examen_template_service.actualizar_item(item, form.cleaned_data)
+        except AlumnosError as exc:
+            _mensaje_error_validacion(request, exc)
+        else:
+            messages.success(request, "Item actualizado correctamente.")
+            return redirect("alumnos:template_detail", pk=item.seccion.examen_template_id)
     return render(
         request,
         "alumnos/templates_examen/item_form.html",
@@ -419,6 +485,10 @@ def item_update(request, item_id):
 def item_desactivar(request, item_id):
     item = get_object_or_404(ExamenTemplateItem.objects.select_related("seccion"), pk=item_id)
     if request.method == "POST":
-        examen_template_service.desactivar_item(item)
-        messages.success(request, "Item desactivado correctamente.")
+        try:
+            examen_template_service.desactivar_item(item)
+        except AlumnosError as exc:
+            _mensaje_error_validacion(request, exc)
+        else:
+            messages.success(request, "Item desactivado correctamente.")
     return redirect("alumnos:template_detail", pk=item.seccion.examen_template_id)

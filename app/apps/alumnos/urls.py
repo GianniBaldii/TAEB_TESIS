@@ -46,6 +46,11 @@ urlpatterns = [
         name="template_update",
     ),
     path(
+        "templates-examen/<int:pk>/duplicar/",
+        views.template_duplicar,
+        name="template_duplicar",
+    ),
+    path(
         "templates-examen/<int:pk>/activar/",
         views.template_activar,
         name="template_activar",
@@ -54,6 +59,11 @@ urlpatterns = [
         "templates-examen/<int:pk>/desactivar/",
         views.template_desactivar,
         name="template_desactivar",
+    ),
+    path(
+        "templates-examen/<int:pk>/eliminar/",
+        views.template_eliminar,
+        name="template_eliminar",
     ),
     path(
         "templates-examen/<int:template_id>/secciones/nueva/",

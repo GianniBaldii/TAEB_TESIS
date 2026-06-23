@@ -9,6 +9,7 @@ ALUMNO_CAMPOS_EDITABLES = {
     "apellido",
     "dni",
     "fecha_nacimiento",
+    "fecha_inicio_taekwondo",
     "email",
     "telefono",
     "direccion",
@@ -23,8 +24,19 @@ def _normalizar_data(data):
     return {campo: valor for campo, valor in data.items() if campo in ALUMNO_CAMPOS_EDITABLES}
 
 
+def obtener_cinturon_inicial():
+    """Obtiene el cinturón activo de menor orden (normalmente, blanco)."""
+    return Cinturon.objects.filter(activo=True).order_by("orden").first()
+
+
 def crear_alumno(data):
-    return Alumno.objects.create(**_normalizar_data(data))
+    datos = _normalizar_data(data)
+    if not datos.get("cinturon_actual"):
+        cinturon_inicial = obtener_cinturon_inicial()
+        if not cinturon_inicial:
+            raise ValueError("No existe un cinturón activo para asignar al alumno.")
+        datos["cinturon_actual"] = cinturon_inicial
+    return Alumno.objects.create(**datos)
 
 
 def actualizar_alumno(alumno, data):
@@ -51,6 +63,17 @@ def obtener_siguiente_cinturon(cinturon_actual):
     if cinturon_actual:
         return cinturones.filter(orden__gt=cinturon_actual.orden).order_by("orden").first()
     return cinturones.order_by("orden").first()
+
+
+def obtener_cinturon_anterior(cinturon):
+    """Devuelve el cinturón activo inmediatamente anterior en la graduación."""
+    if not cinturon:
+        return None
+    return (
+        Cinturon.objects.filter(activo=True, orden__lt=cinturon.orden)
+        .order_by("-orden")
+        .first()
+    )
 
 
 def obtener_ultimo_examen(alumno):

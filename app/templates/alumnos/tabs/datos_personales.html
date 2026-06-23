@@ -4,6 +4,7 @@
         <div><dt class="text-sm font-medium text-slate-500">Apellido</dt><dd class="mt-1 text-slate-900">{{ alumno.apellido }}</dd></div>
         <div><dt class="text-sm font-medium text-slate-500">DNI</dt><dd class="mt-1 text-slate-900">{{ alumno.dni }}</dd></div>
         <div><dt class="text-sm font-medium text-slate-500">Fecha de nacimiento</dt><dd class="mt-1 text-slate-900">{{ alumno.fecha_nacimiento|date:"d/m/Y"|default:"-" }}</dd></div>
+        <div><dt class="text-sm font-medium text-slate-500">Inicio en Taekwondo</dt><dd class="mt-1 text-slate-900">{{ alumno.fecha_inicio_taekwondo|date:"d/m/Y"|default:"-" }}</dd></div>
         <div><dt class="text-sm font-medium text-slate-500">Email</dt><dd class="mt-1 text-slate-900">{{ alumno.email|default:"-" }}</dd></div>
         <div><dt class="text-sm font-medium text-slate-500">Telefono</dt><dd class="mt-1 text-slate-900">{{ alumno.telefono|default:"-" }}</dd></div>
         <div class="md:col-span-2"><dt class="text-sm font-medium text-slate-500">Direccion</dt><dd class="mt-1 text-slate-900">{{ alumno.direccion|default:"-" }}</dd></div>

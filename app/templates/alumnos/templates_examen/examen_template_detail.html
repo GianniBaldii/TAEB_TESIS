@@ -12,8 +12,13 @@
                 <p class="mt-1 text-sm text-slate-500">Version {{ template_examen.version }} · {% if template_examen.activo %}Activo{% else %}Inactivo{% endif %}</p>
             </div>
             <div class="flex flex-wrap gap-2">
+                {% if template_bloqueado %}
+                <form method="post" action="{% url 'alumnos:template_duplicar' template_examen.pk %}">{% csrf_token %}<button class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Duplicar template</button></form>
+                {% else %}
                 <a href="{% url 'alumnos:seccion_create' template_examen.pk %}" class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Agregar seccion</a>
                 <a href="{% url 'alumnos:template_update' template_examen.pk %}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Editar</a>
+                <form method="post" action="{% url 'alumnos:template_eliminar' template_examen.pk %}" onsubmit="return confirm('¿Eliminar este template? Esta acción no se puede deshacer.');">{% csrf_token %}<button class="rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50">Eliminar</button></form>
+                {% endif %}
                 {% if template_examen.activo %}
                 <form method="post" action="{% url 'alumnos:template_desactivar' template_examen.pk %}">{% csrf_token %}<button class="rounded-lg border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50">Desactivar</button></form>
                 {% else %}
@@ -21,6 +26,9 @@
                 {% endif %}
             </div>
         </div>
+        {% if template_bloqueado %}
+        <p class="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">Este template ya fue utilizado en exámenes y no puede modificarse. Creá una nueva versión para actualizar los criterios.</p>
+        {% endif %}
         <p class="mt-4 text-sm text-slate-600">{{ template_examen.descripcion|default:"Sin descripcion." }}</p>
     </div>
     {% for seccion in template_examen.secciones.all %}
@@ -30,11 +38,11 @@
                 <h2 class="font-semibold text-slate-900">{{ seccion.orden }}. {{ seccion.nombre }}</h2>
                 <p class="text-sm text-slate-500">{% if seccion.activo %}Activa{% else %}Inactiva{% endif %} · {% if seccion.obligatorio %}Obligatoria{% else %}Opcional{% endif %}</p>
             </div>
-            <div class="flex flex-wrap gap-2">
+            {% if not template_bloqueado %}<div class="flex flex-wrap gap-2">
                 <a class="text-blue-700 hover:underline" href="{% url 'alumnos:item_create' seccion.pk %}">Agregar item</a>
                 <a class="text-slate-700 hover:underline" href="{% url 'alumnos:seccion_update' seccion.pk %}">Editar</a>
                 <form method="post" action="{% url 'alumnos:seccion_desactivar' seccion.pk %}">{% csrf_token %}<button class="text-red-700 hover:underline">Desactivar</button></form>
-            </div>
+            </div>{% endif %}
         </div>
         <div class="divide-y divide-slate-100">
             {% for item in seccion.items.all %}
@@ -43,7 +51,7 @@
                 <p>{{ item.get_tipo_evaluacion_display }}</p>
                 <p>{% if item.obligatorio %}Obligatorio{% else %}Opcional{% endif %}</p>
                 <p>{% if item.activo %}Activo{% else %}Inactivo{% endif %}</p>
-                <p><a class="text-slate-700 hover:underline" href="{% url 'alumnos:item_update' item.pk %}">Editar</a> <form class="inline" method="post" action="{% url 'alumnos:item_desactivar' item.pk %}">{% csrf_token %}<button class="ml-2 text-red-700 hover:underline">Desactivar</button></form></p>
+                <p>{% if not template_bloqueado %}<a class="text-slate-700 hover:underline" href="{% url 'alumnos:item_update' item.pk %}">Editar</a> <form class="inline" method="post" action="{% url 'alumnos:item_desactivar' item.pk %}">{% csrf_token %}<button class="ml-2 text-red-700 hover:underline">Desactivar</button></form>{% endif %}</p>
             </div>
             {% empty %}
             <p class="px-5 py-4 text-sm text-slate-500">Sin items registrados.</p>

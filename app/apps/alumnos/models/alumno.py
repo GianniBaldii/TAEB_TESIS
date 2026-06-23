@@ -8,6 +8,11 @@ class Alumno(models.Model):
     apellido = models.CharField(max_length=100)
     dni = models.CharField(max_length=20, unique=True)
     fecha_nacimiento = models.DateField(null=True, blank=True)
+    fecha_inicio_taekwondo = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Fecha en la que comenzó a practicar Taekwondo.",
+    )
     email = models.EmailField(unique=True, null=True, blank=True)
     telefono = models.CharField(max_length=30, null=True, blank=True)
     direccion = models.CharField(max_length=255, null=True, blank=True)

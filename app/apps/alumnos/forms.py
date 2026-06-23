@@ -35,6 +35,7 @@ class AlumnoForm(TailwindModelForm):
             "apellido",
             "dni",
             "fecha_nacimiento",
+            "fecha_inicio_taekwondo",
             "email",
             "telefono",
             "direccion",
@@ -43,7 +44,18 @@ class AlumnoForm(TailwindModelForm):
             "cinturon_actual",
             "activo",
         ]
-        widgets = {"fecha_nacimiento": forms.DateInput(attrs={"type": "date"})}
+        widgets = {
+            "fecha_nacimiento": forms.DateInput(attrs={"type": "date"}),
+            "fecha_inicio_taekwondo": forms.DateInput(attrs={"type": "date"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["fecha_inicio_taekwondo"].label = "Fecha de inicio en Taekwondo"
+        self.fields["cinturon_actual"].help_text = (
+            "Déjelo vacío para asignar automáticamente el cinturón inicial. "
+            "Seleccione otro solo si viene de otra escuela."
+        )
 
 
 class ExamenTemplateForm(TailwindModelForm):
@@ -54,10 +66,14 @@ class ExamenTemplateForm(TailwindModelForm):
             "nombre",
             "descripcion",
             "nota_minima_aprobacion",
-            "version",
-            "activo",
+            "vigente_desde",
+            "vigente_hasta",
         ]
-        widgets = {"descripcion": forms.Textarea(attrs={"rows": 3})}
+        widgets = {
+            "descripcion": forms.Textarea(attrs={"rows": 3}),
+            "vigente_desde": forms.DateInput(attrs={"type": "date"}),
+            "vigente_hasta": forms.DateInput(attrs={"type": "date"}),
+        }
 
 
 class ExamenTemplateSeccionForm(TailwindModelForm):
@@ -93,11 +109,6 @@ class CrearExamenForm(forms.Form):
             "Usar para examenes ya rendidos antes de cargar el alumno en TAEB."
         ),
     )
-    cinturon_origen = forms.ModelChoiceField(
-        queryset=Cinturon.objects.filter(activo=True),
-        required=False,
-        label="Cinturon origen",
-    )
     cinturon_destino = forms.ModelChoiceField(
         queryset=Cinturon.objects.filter(activo=True),
         required=False,
@@ -108,3 +119,13 @@ class CrearExamenForm(forms.Form):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs.setdefault("class", INPUT_CLASS)
+        self.fields["es_historico"].widget.attrs["x-model"] = "historico"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get("es_historico") and not cleaned_data.get("cinturon_destino"):
+            self.add_error(
+                "cinturon_destino",
+                "Seleccione el cinturón destino para el examen histórico.",
+            )
+        return cleaned_data

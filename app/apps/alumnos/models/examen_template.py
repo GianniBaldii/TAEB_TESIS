@@ -13,6 +13,15 @@ class ExamenTemplate(models.Model):
         max_digits=5, decimal_places=2, null=True, blank=True
     )
     version = models.PositiveSmallIntegerField(default=1)
+    template_origen = models.ForeignKey(
+        "self",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="versiones_derivadas",
+    )
+    vigente_desde = models.DateField(null=True, blank=True)
+    vigente_hasta = models.DateField(null=True, blank=True)
     activo = models.BooleanField(default=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_modificacion = models.DateTimeField(auto_now=True)
@@ -23,7 +32,7 @@ class ExamenTemplate(models.Model):
         verbose_name_plural = "Templates de examenes"
 
     def __str__(self):
-        return f"{self.nombre} - {self.cinturon}"
+        return f"{self.nombre} v{self.version} - {self.cinturon}"
 
 
 class ExamenTemplateSeccion(models.Model):
