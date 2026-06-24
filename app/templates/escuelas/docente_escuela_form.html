@@ -1,0 +1,2 @@
+{% extends "layouts/principal.html" %}
+{% block contenido %}<section class="rounded-lg bg-white p-6 shadow"><h1 class="mb-6 text-2xl font-bold">Asociar escuela a {{ docente }}</h1><form method="post" class="grid gap-4 md:grid-cols-2">{% csrf_token %}{% include "alumnos/partials/form_fields.html" %}<div class="md:col-span-2"><button class="rounded-lg bg-blue-700 px-4 py-2 text-white">Guardar asignación</button></div></form></section>{% endblock %}

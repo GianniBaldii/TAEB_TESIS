@@ -1,7 +1,9 @@
 from django.db import transaction
 from django.db.models import Count, Q
 
-from apps.alumnos.models import Alumno, AlumnoCinturonHistorial, Cinturon, Examen
+from apps.alumnos.models import Alumno, AlumnoCinturonHistorial, AlumnoEscuela, Cinturon, Examen
+
+from .excepciones import AlumnosError
 
 
 ALUMNO_CAMPOS_EDITABLES = {
@@ -37,6 +39,46 @@ def crear_alumno(data):
             raise ValueError("No existe un cinturón activo para asignar al alumno.")
         datos["cinturon_actual"] = cinturon_inicial
     return Alumno.objects.create(**datos)
+
+
+@transaction.atomic
+def crear_alumno_e_inscribir_en_escuela(datos_alumno, escuela, observaciones_inscripcion=None):
+    alumno = Alumno.objects.filter(dni=datos_alumno["dni"]).first()
+    if alumno:
+        inscripcion, creada = AlumnoEscuela.objects.get_or_create(
+            alumno=alumno,
+            escuela=escuela,
+            defaults={"activo": True, "observaciones": observaciones_inscripcion},
+        )
+        if not creada and inscripcion.activo:
+            raise AlumnosError("El alumno ya se encuentra inscripto en esta escuela.")
+        if not creada:
+            inscripcion.activo = True
+            inscripcion.fecha_baja = None
+            inscripcion.observaciones = observaciones_inscripcion or inscripcion.observaciones
+            inscripcion.save(update_fields=["activo", "fecha_baja", "observaciones", "fecha_modificacion"])
+        return alumno, inscripcion
+    alumno = crear_alumno(datos_alumno)
+    inscripcion = AlumnoEscuela.objects.create(
+        alumno=alumno, escuela=escuela, observaciones=observaciones_inscripcion
+    )
+    return alumno, inscripcion
+
+
+def dar_baja_inscripcion(inscripcion):
+    from django.utils import timezone
+
+    inscripcion.activo = False
+    inscripcion.fecha_baja = timezone.localdate()
+    inscripcion.save(update_fields=["activo", "fecha_baja", "fecha_modificacion"])
+    return inscripcion
+
+
+def reactivar_inscripcion(inscripcion):
+    inscripcion.activo = True
+    inscripcion.fecha_baja = None
+    inscripcion.save(update_fields=["activo", "fecha_baja", "fecha_modificacion"])
+    return inscripcion
 
 
 def actualizar_alumno(alumno, data):

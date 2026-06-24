@@ -30,6 +30,7 @@ DJANGO_APPS = [
 LOCAL_APPS = [
     "apps.core",
     "apps.usuarios",
+    "apps.escuelas",
     "apps.alumnos",
 ]
 

@@ -76,6 +76,8 @@
             Administración
         </p>
         <div class="mt-3">
+            <a href="{% url 'escuelas:escuela_list' %}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"><img src="{% static 'iconos/usuarios.svg' %}" alt="" class="h-5 w-5">Escuelas</a>
+            <a href="{% url 'escuelas:docente_list' %}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"><img src="{% static 'iconos/usuarios.svg' %}" alt="" class="h-5 w-5">Docentes</a>
             <a
                 href="{% url 'admin:index' %}"
                 class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"

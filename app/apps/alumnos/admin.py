@@ -4,6 +4,7 @@ from django.contrib import admin
 
 from .models import (
     Alumno,
+    AlumnoEscuela,
     AlumnoCinturonHistorial,
     Cinturon,
     Examen,
@@ -36,6 +37,14 @@ class AlumnoAdmin(admin.ModelAdmin):
     search_fields = ("nombre", "apellido", "dni", "email", "telefono")
     autocomplete_fields = ("cinturon_actual",)
     ordering = ("apellido", "nombre")
+
+
+@admin.register(AlumnoEscuela)
+class AlumnoEscuelaAdmin(admin.ModelAdmin):
+    list_display = ("alumno", "escuela", "activo", "fecha_inscripcion", "fecha_baja")
+    list_filter = ("activo", "escuela")
+    search_fields = ("alumno__nombre", "alumno__apellido", "alumno__dni", "escuela__nombre")
+    autocomplete_fields = ("alumno", "escuela")
 
 
 class ExamenTemplateItemInline(admin.TabularInline):

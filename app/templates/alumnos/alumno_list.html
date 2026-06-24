@@ -25,6 +25,7 @@
                 <option value="{{ cinturon.id }}" {% if filtros.cinturon == cinturon.id|stringformat:"s" %}selected{% endif %}>{{ cinturon.nombre }}</option>
             {% endfor %}
         </select>
+        {% if request.user.is_superuser %}<select name="escuela" class="rounded-lg border border-slate-300 px-3 py-2 text-sm"><option value="">Todas las escuelas</option>{% for escuela in escuelas %}<option value="{{ escuela.pk }}" {% if filtros.escuela == escuela.pk|stringformat:"s" %}selected{% endif %}>{{ escuela }}</option>{% endfor %}</select>{% endif %}
         <button class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Filtrar</button>
     </form>
 
@@ -44,7 +45,7 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-                {% for alumno in alumnos %}
+                {% for inscripcion in inscripciones %}{% with alumno=inscripcion.alumno %}
                 <tr>
                     <td class="px-4 py-3 font-medium text-slate-900">{{ alumno.apellido }}, {{ alumno.nombre }}</td>
                     <td class="px-4 py-3">{{ alumno.dni }}</td>
@@ -53,12 +54,12 @@
                     <td class="px-4 py-3">{{ alumno.peso_aproximado|default:"-" }}</td>
                     <td class="px-4 py-3">{{ alumno.altura_aproximada|default:"-" }}</td>
                     <td class="px-4 py-3">{{ alumno.telefono|default:"-" }}</td>
-                    <td class="px-4 py-3">{% if alumno.activo %}Activo{% else %}Inactivo{% endif %}</td>
+                    <td class="px-4 py-3">{% if inscripcion.activo %}Activo{% else %}Inactivo{% endif %}</td>
                     <td class="px-4 py-3">
                         <div class="flex flex-wrap gap-2">
                             <a class="text-blue-700 hover:underline" href="{% url 'alumnos:alumno_detail' alumno.pk %}">Ficha</a>
                             <a class="text-slate-700 hover:underline" href="{% url 'alumnos:alumno_update' alumno.pk %}">Editar</a>
-                            {% if alumno.activo %}
+                            {% if inscripcion.activo %}
                             <form method="post" action="{% url 'alumnos:alumno_baja' alumno.pk %}">{% csrf_token %}<button class="text-red-700 hover:underline">Baja</button></form>
                             {% else %}
                             <form method="post" action="{% url 'alumnos:alumno_reactivar' alumno.pk %}">{% csrf_token %}<button class="text-green-700 hover:underline">Reactivar</button></form>
@@ -66,6 +67,7 @@
                         </div>
                     </td>
                 </tr>
+                {% endwith %}
                 {% empty %}
                 <tr><td colspan="9" class="px-4 py-8 text-center text-slate-500">No hay alumnos para mostrar.</td></tr>
                 {% endfor %}

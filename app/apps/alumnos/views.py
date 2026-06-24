@@ -3,6 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Prefetch, Q
 from django.shortcuts import get_object_or_404, redirect, render
 
+from apps.escuelas.services.acceso_escuela_service import obtener_escuela_activa_usuario
+from apps.escuelas.models import Escuela
+
 from .forms import (
     AlumnoForm,
     CrearExamenForm,
@@ -12,6 +15,7 @@ from .forms import (
 )
 from .models import (
     Alumno,
+    AlumnoEscuela,
     Cinturon,
     Examen,
     ExamenDetalle,
@@ -31,6 +35,20 @@ def _alumno_queryset():
     return Alumno.objects.select_related("cinturon_actual")
 
 
+def _escuela_operativa(request):
+    return obtener_escuela_activa_usuario(request.user)
+
+
+def _alumno_accesible(request, alumno_id, incluir_inactiva=False):
+    inscripciones = AlumnoEscuela.objects.select_related("alumno", "alumno__cinturon_actual", "escuela")
+    if not request.user.is_superuser:
+        inscripciones = inscripciones.filter(escuela=_escuela_operativa(request))
+    if not incluir_inactiva:
+        inscripciones = inscripciones.filter(activo=True)
+    inscripcion = get_object_or_404(inscripciones, alumno_id=alumno_id)
+    return inscripcion.alumno, inscripcion
+
+
 def _examen_queryset(alumno):
     return Examen.objects.filter(alumno=alumno).select_related(
         "alumno", "examen_template", "cinturon_origen", "cinturon_destino"
@@ -39,29 +57,37 @@ def _examen_queryset(alumno):
 
 @login_required
 def alumno_list(request):
-    alumnos = _alumno_queryset()
+    inscripciones = AlumnoEscuela.objects.select_related("alumno", "alumno__cinturon_actual", "escuela")
+    escuela_id = request.GET.get("escuela", "")
+    if request.user.is_superuser:
+        if escuela_id:
+            inscripciones = inscripciones.filter(escuela_id=escuela_id)
+    else:
+        inscripciones = inscripciones.filter(escuela=_escuela_operativa(request))
     busqueda = request.GET.get("q", "").strip()
     activo = request.GET.get("activo", "")
     cinturon_id = request.GET.get("cinturon", "")
 
     if busqueda:
-        alumnos = alumnos.filter(
-            Q(nombre__icontains=busqueda)
-            | Q(apellido__icontains=busqueda)
-            | Q(dni__icontains=busqueda)
+        inscripciones = inscripciones.filter(
+            Q(alumno__nombre__icontains=busqueda)
+            | Q(alumno__apellido__icontains=busqueda)
+            | Q(alumno__dni__icontains=busqueda)
         )
     if activo in {"1", "0"}:
-        alumnos = alumnos.filter(activo=activo == "1")
+        inscripciones = inscripciones.filter(activo=activo == "1")
     if cinturon_id:
-        alumnos = alumnos.filter(cinturon_actual_id=cinturon_id)
+        inscripciones = inscripciones.filter(alumno__cinturon_actual_id=cinturon_id)
 
     return render(
         request,
         "alumnos/alumno_list.html",
         {
-            "alumnos": alumnos,
+            "inscripciones": inscripciones,
+            "alumnos": [inscripcion.alumno for inscripcion in inscripciones],
+            "escuelas": Escuela.objects.filter(activo=True) if request.user.is_superuser else [],
             "cinturones": Cinturon.objects.filter(activo=True),
-            "filtros": {"q": busqueda, "activo": activo, "cinturon": cinturon_id},
+            "filtros": {"q": busqueda, "activo": activo, "cinturon": cinturon_id, "escuela": escuela_id},
             "titulo_pagina": "Alumnos",
         },
     )
@@ -71,15 +97,22 @@ def alumno_list(request):
 def alumno_create(request):
     form = AlumnoForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        alumno = alumno_service.crear_alumno(form.cleaned_data)
-        messages.success(request, "Alumno creado correctamente.")
-        return redirect("alumnos:alumno_detail", pk=alumno.pk)
-    return render(request, "alumnos/alumno_form.html", {"form": form, "modo": "crear"})
+        escuela = _escuela_operativa(request)
+        if request.user.is_superuser:
+            escuela = get_object_or_404(Escuela.objects.filter(activo=True), pk=request.POST.get("escuela"))
+        try:
+            alumno, _ = alumno_service.crear_alumno_e_inscribir_en_escuela(form.cleaned_data, escuela)
+        except AlumnosError as exc:
+            _mensaje_error_validacion(request, exc)
+        else:
+            messages.success(request, "Alumno creado e inscripto correctamente.")
+            return redirect("alumnos:alumno_detail", pk=alumno.pk)
+    return render(request, "alumnos/alumno_form.html", {"form": form, "modo": "crear", "escuelas": Escuela.objects.filter(activo=True) if request.user.is_superuser else []})
 
 
 @login_required
 def alumno_update(request, pk):
-    alumno = get_object_or_404(_alumno_queryset(), pk=pk)
+    alumno, _ = _alumno_accesible(request, pk)
     form = AlumnoForm(request.POST or None, instance=alumno)
     if request.method == "POST" and form.is_valid():
         alumno_service.actualizar_alumno(alumno, form.cleaned_data)
@@ -94,7 +127,7 @@ def alumno_update(request, pk):
 
 @login_required
 def alumno_detail(request, pk):
-    alumno = get_object_or_404(_alumno_queryset(), pk=pk)
+    alumno, _ = _alumno_accesible(request, pk)
     examenes = _examen_queryset(alumno).exclude(estado=Examen.Estado.ANULADO)
     historial = alumno.historial_cinturones.select_related("cinturon", "examen")
     return render(
@@ -111,25 +144,25 @@ def alumno_detail(request, pk):
 
 @login_required
 def alumno_baja(request, pk):
-    alumno = get_object_or_404(Alumno, pk=pk)
+    alumno, inscripcion = _alumno_accesible(request, pk, incluir_inactiva=True)
     if request.method == "POST":
-        alumno_service.dar_baja_alumno(alumno)
-        messages.success(request, "Alumno dado de baja correctamente.")
+        alumno_service.dar_baja_inscripcion(inscripcion)
+        messages.success(request, "Inscripción del alumno dada de baja correctamente.")
     return redirect("alumnos:alumno_list")
 
 
 @login_required
 def alumno_reactivar(request, pk):
-    alumno = get_object_or_404(Alumno, pk=pk)
+    alumno, inscripcion = _alumno_accesible(request, pk, incluir_inactiva=True)
     if request.method == "POST":
-        alumno_service.reactivar_alumno(alumno)
-        messages.success(request, "Alumno reactivado correctamente.")
+        alumno_service.reactivar_inscripcion(inscripcion)
+        messages.success(request, "Inscripción del alumno reactivada correctamente.")
     return redirect("alumnos:alumno_list")
 
 
 @login_required
 def examen_create(request, alumno_id):
-    alumno = get_object_or_404(_alumno_queryset(), pk=alumno_id)
+    alumno, _ = _alumno_accesible(request, alumno_id)
     form = CrearExamenForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         try:
@@ -160,15 +193,15 @@ def examen_create(request, alumno_id):
     )
 
 
-def _obtener_examen(alumno_id, examen_id):
-    alumno = get_object_or_404(_alumno_queryset(), pk=alumno_id)
+def _obtener_examen(request, alumno_id, examen_id):
+    alumno, _ = _alumno_accesible(request, alumno_id)
     examen = get_object_or_404(_examen_queryset(alumno), pk=examen_id)
     return alumno, examen
 
 
 @login_required
 def examen_detail(request, alumno_id, examen_id):
-    alumno, examen = _obtener_examen(alumno_id, examen_id)
+    alumno, examen = _obtener_examen(request, alumno_id, examen_id)
     detalles = examen.detalles.select_related("template_item", "template_item__seccion")
     return render(
         request,
@@ -179,7 +212,7 @@ def examen_detail(request, alumno_id, examen_id):
 
 @login_required
 def examen_evaluaciones(request, alumno_id, examen_id):
-    alumno, examen = _obtener_examen(alumno_id, examen_id)
+    alumno, examen = _obtener_examen(request, alumno_id, examen_id)
     if examen_alumno_service.examen_tiene_estado_final(examen):
         _mensaje_error_validacion(
             request,
@@ -223,7 +256,7 @@ def examen_evaluaciones(request, alumno_id, examen_id):
 
 @login_required
 def examen_aprobar(request, alumno_id, examen_id):
-    alumno, examen = _obtener_examen(alumno_id, examen_id)
+    alumno, examen = _obtener_examen(request, alumno_id, examen_id)
     if request.method == "POST":
         try:
             examen_alumno_service.aprobar_examen(examen)
@@ -236,7 +269,7 @@ def examen_aprobar(request, alumno_id, examen_id):
 
 @login_required
 def examen_desaprobar(request, alumno_id, examen_id):
-    alumno, examen = _obtener_examen(alumno_id, examen_id)
+    alumno, examen = _obtener_examen(request, alumno_id, examen_id)
     if request.method == "POST":
         try:
             examen_alumno_service.desaprobar_examen(examen)
@@ -249,7 +282,7 @@ def examen_desaprobar(request, alumno_id, examen_id):
 
 @login_required
 def examen_anular(request, alumno_id, examen_id):
-    alumno, examen = _obtener_examen(alumno_id, examen_id)
+    alumno, examen = _obtener_examen(request, alumno_id, examen_id)
     if request.method == "POST":
         try:
             examen_alumno_service.anular_examen(examen)
