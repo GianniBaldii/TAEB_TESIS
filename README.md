@@ -446,6 +446,31 @@ Abrir una consola de Django:
 docker compose exec web python app/manage.py shell
 ```
 
+## Versionado del proyecto
+
+La versión actual se guarda en [`VERSION`](VERSION) y el detalle de cada
+entrega en [`CHANGELOG.md`](CHANGELOG.md). Se utiliza versionado semántico:
+
+```text
+MAJOR.MINOR.PATCH
+```
+
+Al integrar cambios a `desarrollo`, actualizar ambos archivos en el mismo Pull
+Request:
+
+1. Incrementar `PATCH` para correcciones, `MINOR` para funcionalidades nuevas
+   o `MAJOR` para cambios incompatibles.
+2. Mover los cambios de **Próxima versión** a una nueva sección fechada en
+   `CHANGELOG.md`.
+3. Actualizar el archivo `VERSION` con ese mismo número.
+
+Ejemplo para una nueva funcionalidad desde `0.1.0`:
+
+```text
+VERSION: 0.2.0
+CHANGELOG.md: ## 0.2.0 - AAAA-MM-DD
+```
+
 ## Uso de la consola y protocolo Git
 
 Todos los comandos de Git deben ejecutarse desde la raíz del proyecto:
