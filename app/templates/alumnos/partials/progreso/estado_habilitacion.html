@@ -1,0 +1,19 @@
+<article class="rounded-2xl border p-5 shadow-sm {{ analisis_trayectoria.estado_habilitacion.classes }}">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-wide opacity-70">Estado orientativo</p>
+            <h3 class="mt-1 text-2xl font-black">{{ analisis_trayectoria.estado_habilitacion.label }}</h3>
+            <p class="mt-2 max-w-3xl text-sm leading-6 opacity-90">{{ analisis_trayectoria.estado_habilitacion.mensaje }}</p>
+        </div>
+        <div class="shrink-0 rounded-2xl border bg-white/70 px-5 py-4 text-center shadow-sm">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Avance temporal</p>
+            <p class="mt-1 text-3xl font-black text-slate-900">{{ analisis_trayectoria.porcentaje_progreso }}%</p>
+        </div>
+    </div>
+    <div class="mt-5 h-3 overflow-hidden rounded-full bg-white/70">
+        <div class="h-full rounded-full bg-current transition-all duration-500" style="width: {{ analisis_trayectoria.porcentaje_progreso }}%"></div>
+    </div>
+    <p class="mt-3 text-xs opacity-75">
+        Este análisis es orientativo y no bloquea decisiones pedagógicas del docente.
+    </p>
+</article>

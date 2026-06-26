@@ -1,0 +1,23 @@
+{% extends "layouts/principal.html" %}
+
+{% block title %}Ficha de alumno | TAEB{% endblock %}
+
+{% block contenido %}
+<section x-data="{ tab: 'datos' }" class="space-y-5">
+    {% include "alumnos/partials/alumno_header.html" %}
+
+    <div class="border-b border-slate-200">
+        <nav class="flex flex-wrap gap-2">
+            <button @click="tab = 'datos'" :class="tab === 'datos' ? 'border-blue-700 text-blue-700' : 'border-transparent text-slate-600'" class="border-b-2 px-3 py-2 text-sm font-semibold">Datos personales</button>
+            <button @click="tab = 'progreso'" :class="tab === 'progreso' ? 'border-blue-700 text-blue-700' : 'border-transparent text-slate-600'" class="border-b-2 px-3 py-2 text-sm font-semibold">Progreso</button>
+            <button @click="tab = 'examenes'" :class="tab === 'examenes' ? 'border-blue-700 text-blue-700' : 'border-transparent text-slate-600'" class="border-b-2 px-3 py-2 text-sm font-semibold">Examenes</button>
+            <button @click="tab = 'historial'" :class="tab === 'historial' ? 'border-blue-700 text-blue-700' : 'border-transparent text-slate-600'" class="border-b-2 px-3 py-2 text-sm font-semibold">Historial de cinturones</button>
+        </nav>
+    </div>
+
+    <div x-show="tab === 'datos'">{% include "alumnos/tabs/datos_personales.html" %}</div>
+    <div x-show="tab === 'progreso'">{% include "alumnos/tabs/progreso.html" %}</div>
+    <div x-show="tab === 'examenes'">{% include "alumnos/tabs/examenes.html" %}</div>
+    <div x-show="tab === 'historial'">{% include "alumnos/tabs/historial_cinturones.html" %}</div>
+</section>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends "layouts/principal.html" %}
+
+{% block title %}Template de examen | TAEB{% endblock %}
+
+{% block contenido %}
+<section class="space-y-5">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-100 bg-gradient-to-r from-blue-50 via-white to-slate-50 p-6">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div class="flex items-start gap-4">
+                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-700 text-xl text-white shadow-sm">
+                        <i class="fa-solid fa-file-signature"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-blue-700">Template de examen</p>
+                        <h1 class="text-2xl font-black text-slate-950">{{ template_examen.nombre }}</h1>
+                        <div class="mt-3 flex flex-wrap items-center gap-2">
+                            {% include "alumnos/partials/belt_badge.html" with cinturon=template_examen.cinturon %}
+                            <span class="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700"><i class="fa-solid fa-code-branch"></i>v{{ template_examen.version }}</span>
+                            <span class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold {% if template_examen.activo %}border-green-200 bg-green-50 text-green-700{% else %}border-slate-200 bg-slate-100 text-slate-600{% endif %}">
+                                <i class="fa-solid {% if template_examen.activo %}fa-circle-check{% else %}fa-circle-pause{% endif %}"></i>
+                                {% if template_examen.activo %}Activo{% else %}Inactivo{% endif %}
+                            </span>
+                            {% if template_bloqueado %}
+                            <span class="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800"><i class="fa-solid fa-lock"></i>Bloqueado</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <a href="{% url 'alumnos:template_list' %}" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-arrow-left"></i>Volver</a>
+                    {% if template_bloqueado %}
+                    <form method="post" action="{% url 'alumnos:template_duplicar' template_examen.pk %}">{% csrf_token %}<button class="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800"><i class="fa-solid fa-copy"></i>Duplicar template</button></form>
+                    {% else %}
+                    <a href="{% url 'alumnos:seccion_create' template_examen.pk %}" class="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800"><i class="fa-solid fa-plus"></i>Agregar sección</a>
+                    <a href="{% url 'alumnos:template_update' template_examen.pk %}" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-pen"></i>Editar</a>
+                    <form method="post" action="{% url 'alumnos:template_eliminar' template_examen.pk %}" onsubmit="return confirm('¿Eliminar este template? Esta acción no se puede deshacer.');">{% csrf_token %}<button class="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-100"><i class="fa-solid fa-trash"></i>Eliminar</button></form>
+                    {% endif %}
+                    {% if template_examen.activo %}
+                    <form method="post" action="{% url 'alumnos:template_desactivar' template_examen.pk %}">{% csrf_token %}<button class="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50"><i class="fa-solid fa-toggle-off"></i>Desactivar</button></form>
+                    {% else %}
+                    <form method="post" action="{% url 'alumnos:template_activar' template_examen.pk %}">{% csrf_token %}<button class="inline-flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-4 py-2 text-sm font-semibold text-green-700 hover:bg-green-100"><i class="fa-solid fa-toggle-on"></i>Activar</button></form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="grid gap-4 p-6 md:grid-cols-2 xl:grid-cols-4">
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4"><p class="text-xs font-semibold uppercase text-slate-500">Nota mínima</p><p class="mt-2 text-2xl font-black text-slate-950">{{ template_examen.nota_minima_aprobacion|default:"-" }}</p></article>
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4"><p class="text-xs font-semibold uppercase text-slate-500">Vigente desde</p><p class="mt-2 font-bold text-slate-950">{{ template_examen.vigente_desde|date:"d/m/Y"|default:"-" }}</p></article>
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4"><p class="text-xs font-semibold uppercase text-slate-500">Vigente hasta</p><p class="mt-2 font-bold text-slate-950">{{ template_examen.vigente_hasta|date:"d/m/Y"|default:"-" }}</p></article>
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4"><p class="text-xs font-semibold uppercase text-slate-500">Secciones</p><p class="mt-2 text-2xl font-black text-slate-950">{{ template_examen.secciones.all|length }}</p></article>
+        </div>
+
+        {% if template_bloqueado %}
+        <div class="mx-6 mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+            <i class="fa-solid fa-lock mr-1"></i>
+            Este template ya fue utilizado en exámenes y no puede modificarse. Creá una nueva versión para actualizar los criterios.
+        </div>
+        {% endif %}
+
+        <div class="border-t border-slate-100 p-6">
+            <p class="text-sm leading-6 text-slate-600">{{ template_examen.descripcion|default:"Sin descripción." }}</p>
+        </div>
+    </div>
+
+    {% for seccion in template_examen.secciones.all %}
+    <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="flex flex-col gap-3 border-b border-slate-200 bg-slate-50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+            <div class="flex items-start gap-3">
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 font-black text-blue-700">{{ seccion.orden }}</span>
+                <div>
+                    <h2 class="font-black text-slate-950">{{ seccion.nombre }}</h2>
+                    <p class="text-sm text-slate-500">{% if seccion.activo %}Activa{% else %}Inactiva{% endif %} · {% if seccion.obligatorio %}Obligatoria{% else %}Opcional{% endif %}</p>
+                    {% if seccion.descripcion %}<p class="mt-1 text-sm text-slate-500">{{ seccion.descripcion }}</p>{% endif %}
+                </div>
+            </div>
+            {% if not template_bloqueado %}
+            <div class="flex flex-wrap gap-2">
+                <a class="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100" href="{% url 'alumnos:item_create' seccion.pk %}"><i class="fa-solid fa-plus"></i>Agregar ítem</a>
+                <a class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50" href="{% url 'alumnos:seccion_update' seccion.pk %}"><i class="fa-solid fa-pen"></i>Editar</a>
+                <form method="post" action="{% url 'alumnos:seccion_desactivar' seccion.pk %}">{% csrf_token %}<button class="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-bold text-red-700 hover:bg-red-100"><i class="fa-solid fa-ban"></i>Desactivar</button></form>
+            </div>
+            {% endif %}
+        </div>
+        <div class="divide-y divide-slate-100">
+            {% for item in seccion.items.all %}
+            <div class="grid gap-3 px-5 py-4 text-sm md:grid-cols-[minmax(0,1.5fr)_repeat(4,minmax(0,1fr))] md:items-center">
+                <p class="font-bold text-slate-950">{{ item.orden }}. {{ item.nombre }}</p>
+                <p><span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">{{ item.get_tipo_evaluacion_display }}</span></p>
+                <p class="text-slate-600">{% if item.obligatorio %}<i class="fa-solid fa-asterisk mr-1 text-amber-500"></i>Obligatorio{% else %}Opcional{% endif %}</p>
+                <p>{% if item.activo %}<span class="font-bold text-green-700">Activo</span>{% else %}<span class="font-bold text-slate-500">Inactivo</span>{% endif %}</p>
+                <div class="flex gap-2 md:justify-end">
+                    {% if not template_bloqueado %}
+                    <a class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50" href="{% url 'alumnos:item_update' item.pk %}" title="Editar"><i class="fa-solid fa-pen"></i></a>
+                    <form method="post" action="{% url 'alumnos:item_desactivar' item.pk %}">{% csrf_token %}<button class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100" title="Desactivar"><i class="fa-solid fa-ban"></i></button></form>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <p class="px-5 py-8 text-center text-sm text-slate-500">Sin ítems registrados.</p>
+            {% endfor %}
+        </div>
+    </article>
+    {% empty %}
+    <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-slate-500">
+        <i class="fa-solid fa-layer-group text-3xl text-slate-300"></i>
+        <p class="mt-3 font-bold text-slate-900">Sin secciones registradas</p>
+        <p class="mt-1 text-sm">Agregá una sección para empezar a definir criterios.</p>
+    </div>
+    {% endfor %}
+</section>
+{% endblock %}

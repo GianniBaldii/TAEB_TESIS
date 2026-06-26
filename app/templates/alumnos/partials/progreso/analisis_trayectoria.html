@@ -1,0 +1,75 @@
+<section class="space-y-5">
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+                <p class="text-sm font-semibold uppercase tracking-wide text-blue-700">Análisis de trayectoria</p>
+                <h2 class="mt-1 text-2xl font-black text-slate-950">Lectura temporal del progreso</h2>
+                <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                    Una guía visual para entender cuánto tiempo lleva el alumno en su cinturón actual,
+                    cuál es su próxima meta y cómo se compara con referencias orientativas ITF.
+                </p>
+            </div>
+            <span class="inline-flex w-fit rounded-full border px-3 py-1 text-xs font-bold {{ analisis_trayectoria.estado_habilitacion.badge_classes }}">
+                {{ analisis_trayectoria.estado_habilitacion.label }}
+            </span>
+        </div>
+    </div>
+
+    {% include "alumnos/partials/progreso/estado_habilitacion.html" %}
+
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p class="text-sm text-slate-500">Tiempo en cinturón actual</p>
+            <p class="mt-2 text-2xl font-black text-slate-950">{{ analisis_trayectoria.tiempo_desde_ultimo_cinturon }}</p>
+            <p class="mt-1 text-xs text-slate-500">Desde la última promoción o fecha de inicio.</p>
+        </article>
+        <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p class="text-sm text-slate-500">Tiempo orientativo requerido</p>
+            <p class="mt-2 text-2xl font-black text-slate-950">{{ analisis_trayectoria.tiempo_orientativo_label }}</p>
+            <p class="mt-1 text-xs text-slate-500">Para el próximo examen.</p>
+        </article>
+        <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p class="text-sm text-slate-500">Promedio histórico</p>
+            <p class="mt-2 text-2xl font-black text-slate-950">{{ analisis_trayectoria.promedio_historico }}</p>
+            <p class="mt-1 text-xs text-slate-500">Entre promociones registradas.</p>
+        </article>
+        <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p class="text-sm text-slate-500">Promociones obtenidas</p>
+            <p class="mt-2 text-2xl font-black text-slate-950">{{ analisis_trayectoria.promociones_obtenidas }}</p>
+            <p class="mt-1 text-xs text-slate-500">Hitos del historial.</p>
+        </article>
+    </div>
+
+    <div class="grid gap-4 lg:grid-cols-3">
+        <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
+            <h3 class="text-lg font-black text-slate-950">Próxima meta</h3>
+            <div class="mt-4 grid gap-4 md:grid-cols-2">
+                <div>
+                    <p class="text-xs font-semibold uppercase text-slate-500">Cinturón actual</p>
+                    <div class="mt-2">{% include "alumnos/partials/components/cinturon_visual.html" with cinturon=analisis_trayectoria.cinturon_actual %}</div>
+                </div>
+                <div>
+                    <p class="text-xs font-semibold uppercase text-slate-500">Próximo cinturón</p>
+                    <div class="mt-2">{% include "alumnos/partials/components/cinturon_visual.html" with cinturon=analisis_trayectoria.proximo_cinturon %}</div>
+                </div>
+            </div>
+            <p class="mt-4 rounded-xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+                {{ analisis_trayectoria.comparacion_historica }}
+            </p>
+        </article>
+
+        <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 class="text-lg font-black text-slate-950">Exámenes</h3>
+            <dl class="mt-4 space-y-3 text-sm">
+                <div class="flex justify-between gap-3"><dt class="text-slate-500">Aprobados</dt><dd class="font-bold text-green-700">{{ analisis_trayectoria.cantidad_aprobados }}</dd></div>
+                <div class="flex justify-between gap-3"><dt class="text-slate-500">Desaprobados</dt><dd class="font-bold text-red-700">{{ analisis_trayectoria.cantidad_desaprobados }}</dd></div>
+                <div class="flex justify-between gap-3"><dt class="text-slate-500">Pendientes</dt><dd class="font-bold text-amber-700">{{ analisis_trayectoria.cantidad_pendientes }}</dd></div>
+                <div class="flex justify-between gap-3"><dt class="text-slate-500">Total registrados</dt><dd class="font-bold text-slate-900">{{ analisis_trayectoria.cantidad_examenes }}</dd></div>
+            </dl>
+            <div class="mt-4 rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
+                <span class="font-semibold">Último examen:</span>
+                {{ analisis_trayectoria.ultimo_examen|default:"Sin exámenes registrados" }}
+            </div>
+        </article>
+    </div>
+</section>

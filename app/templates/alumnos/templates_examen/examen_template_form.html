@@ -1,0 +1,46 @@
+{% extends "layouts/principal.html" %}
+
+{% block title %}Template de examen | TAEB{% endblock %}
+
+{% block contenido %}
+<section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div class="border-b border-slate-100 bg-gradient-to-r from-blue-50 via-white to-slate-50 p-6">
+        <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-700 text-xl text-white shadow-sm">
+                <i class="fa-solid {% if modo == 'crear' %}fa-file-circle-plus{% else %}fa-file-pen{% endif %}"></i>
+            </div>
+            <div>
+                <p class="text-sm font-semibold uppercase tracking-wide text-blue-700">Templates de exámenes</p>
+                <h1 class="text-2xl font-black text-slate-950">{% if modo == "crear" %}Nuevo template{% else %}Editar template{% endif %}</h1>
+                <p class="mt-1 text-sm text-slate-500">Definí el cinturón, vigencia y criterios generales del examen.</p>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" class="space-y-6 p-6">
+        {% csrf_token %}
+        <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="mb-5 flex items-center gap-3">
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-blue-700"><i class="fa-solid fa-circle-info"></i></span>
+                <div>
+                    <h2 class="text-lg font-black text-slate-950">Datos principales</h2>
+                    <p class="text-sm text-slate-500">Información base para identificar el template.</p>
+                </div>
+            </div>
+            <div class="grid gap-4 md:grid-cols-2">
+                {% include "alumnos/partials/form_field_icon.html" with field=form.nombre icon="fa-file-lines" %}
+                {% include "alumnos/partials/form_field_icon.html" with field=form.cinturon icon="fa-award" %}
+                {% include "alumnos/partials/form_field_icon.html" with field=form.nota_minima_aprobacion icon="fa-star" %}
+                {% include "alumnos/partials/form_field_icon.html" with field=form.vigente_desde icon="fa-calendar-day" %}
+                {% include "alumnos/partials/form_field_icon.html" with field=form.vigente_hasta icon="fa-calendar-xmark" %}
+                {% include "alumnos/partials/form_field_icon.html" with field=form.descripcion icon="fa-align-left" wrapper_class="md:col-span-2" %}
+            </div>
+        </article>
+
+        <div class="flex flex-col-reverse gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:justify-end">
+            <a href="{% if template_examen %}{% url 'alumnos:template_detail' template_examen.pk %}{% else %}{% url 'alumnos:template_list' %}{% endif %}" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-arrow-left"></i>Volver</a>
+            <button class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-800"><i class="fa-solid fa-floppy-disk"></i>Guardar</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

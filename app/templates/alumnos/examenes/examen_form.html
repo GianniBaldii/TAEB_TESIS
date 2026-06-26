@@ -1,0 +1,97 @@
+{% extends "layouts/principal.html" %}
+
+{% block title %}Crear examen | TAEB{% endblock %}
+
+{% block contenido %}
+{% include "alumnos/partials/examen_breadcrumb.html" %}
+<section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div class="border-b border-slate-100 bg-gradient-to-r from-blue-50 via-white to-slate-50 p-6">
+        <div class="flex items-center gap-4">
+            <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-700 text-xl text-white shadow-sm">
+                <i class="fa-solid fa-clipboard-list"></i>
+            </div>
+            <div>
+                <p class="text-sm font-semibold uppercase tracking-wide text-blue-700">{{ alumno }}</p>
+                <h1 class="text-2xl font-black text-slate-950">Crear examen</h1>
+                <p class="mt-1 text-sm text-slate-500">Registrá un examen actual o cargá uno histórico para completar el recorrido del alumno.</p>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" class="space-y-6 p-6" x-data="{ historico: {{ form.es_historico.value|yesno:'true,false' }} }">
+        {% csrf_token %}
+
+        <div class="grid gap-4 md:grid-cols-2">
+            <div>
+                <label for="{{ form.fecha_examen.id_for_label }}" class="mb-1.5 flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <i class="fa-solid fa-calendar-day text-slate-400"></i>
+                    Fecha de examen
+                </label>
+                {{ form.fecha_examen }}
+                {% for error in form.fecha_examen.errors %}<p class="mt-1 text-sm font-semibold text-red-600">{{ error }}</p>{% endfor %}
+            </div>
+            <div>
+                <label for="{{ form.lugar.id_for_label }}" class="mb-1.5 flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <i class="fa-solid fa-location-dot text-slate-400"></i>
+                    Lugar
+                </label>
+                {{ form.lugar }}
+                {% for error in form.lugar.errors %}<p class="mt-1 text-sm font-semibold text-red-600">{{ error }}</p>{% endfor %}
+            </div>
+        </div>
+
+        <label class="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:bg-slate-100">
+            <span class="flex items-start gap-3">
+                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </span>
+                <span>
+                    <span class="block font-bold text-slate-900">Registrar como examen histórico</span>
+                    <span class="text-sm leading-6 text-slate-500">Usalo para exámenes rendidos antes de cargar el alumno en TAEB.</span>
+                </span>
+            </span>
+            <span class="relative inline-flex shrink-0 items-center">
+                <input type="checkbox" name="{{ form.es_historico.html_name }}" id="{{ form.es_historico.id_for_label }}" x-model="historico" class="peer sr-only" {% if form.es_historico.value %}checked{% endif %}>
+                <span class="h-7 w-12 rounded-full bg-slate-300 transition peer-checked:bg-blue-700 peer-focus-visible:ring-2 peer-focus-visible:ring-blue-500 peer-focus-visible:ring-offset-2"></span>
+                <span class="pointer-events-none absolute left-1 h-5 w-5 rounded-full bg-white shadow-sm transition peer-checked:translate-x-5"></span>
+            </span>
+        </label>
+
+        <div x-show="!historico" class="grid gap-4 md:grid-cols-2">
+            <article class="rounded-2xl border border-blue-100 bg-blue-50 p-5">
+                <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-blue-700">Cinturón actual</p>
+                {% include "alumnos/partials/components/cinturon_visual.html" with cinturon=alumno.cinturon_actual %}
+            </article>
+            <article class="rounded-2xl border border-emerald-100 bg-emerald-50 p-5">
+                <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-emerald-700">Cinturón a rendir</p>
+                {% include "alumnos/partials/components/cinturon_visual.html" with cinturon=proximo_cinturon %}
+            </article>
+        </div>
+
+        <div x-cloak x-show="historico" x-transition class="rounded-2xl border border-amber-200 bg-amber-50 p-5">
+            <label for="{{ form.cinturon_destino.id_for_label }}" class="mb-1.5 flex items-center gap-2 text-sm font-semibold text-slate-700">
+                <i class="fa-solid fa-award text-amber-600"></i>
+                Cinturón destino
+            </label>
+            {{ form.cinturon_destino }}
+            {% for error in form.cinturon_destino.errors %}<p class="mt-1 text-sm font-semibold text-red-600">{{ error }}</p>{% endfor %}
+            <p class="mt-2 text-sm leading-6 text-amber-900">El cinturón origen se calculará automáticamente según el orden de graduación.</p>
+        </div>
+
+        {% for error in form.non_field_errors %}
+            <p class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">{{ error }}</p>
+        {% endfor %}
+
+        <div class="flex flex-col-reverse gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:justify-end">
+            <a href="{% url 'alumnos:alumno_detail' alumno.pk %}" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                <i class="fa-solid fa-arrow-left"></i>
+                Volver a la ficha
+            </a>
+            <button class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-800">
+                <i class="fa-solid fa-plus"></i>
+                Crear examen
+            </button>
+        </div>
+    </form>
+</section>
+{% endblock %}

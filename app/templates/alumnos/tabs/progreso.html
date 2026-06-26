@@ -1,0 +1,15 @@
+<div class="space-y-6">
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">Cinturón actual</p><div class="mt-2">{% include "alumnos/partials/belt_badge.html" with cinturon=progreso.cinturon_actual %}</div></article>
+        <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">Próximo cinturón</p><div class="mt-2">{% include "alumnos/partials/belt_badge.html" with cinturon=progreso.proximo_cinturon %}</div></article>
+        <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">Último examen</p><p class="mt-2 font-semibold text-slate-900">{{ progreso.ultimo_examen|default:"-" }}</p></article>
+        <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">Aprobados</p><p class="mt-2 text-2xl font-bold text-slate-900">{{ progreso.resumen_examenes.aprobados }}</p></article>
+        <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">Desaprobados</p><p class="mt-2 text-2xl font-bold text-slate-900">{{ progreso.resumen_examenes.desaprobados }}</p></article>
+        <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">Pendientes</p><p class="mt-2 text-2xl font-bold text-slate-900">{{ progreso.resumen_examenes.pendientes }}</p></article>
+        <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">Anulados</p><p class="mt-2 text-2xl font-bold text-slate-900">{{ progreso.resumen_examenes.anulados }}</p></article>
+        <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">Ausentes</p><p class="mt-2 text-2xl font-bold text-slate-900">{{ progreso.resumen_examenes.ausentes }}</p></article>
+    </div>
+
+    {% include "alumnos/partials/progreso/analisis_trayectoria.html" %}
+    {% include "alumnos/partials/progreso/glosario_tiempos.html" %}
+</div>

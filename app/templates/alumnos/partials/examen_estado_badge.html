@@ -1,0 +1,15 @@
+{% load alumno_tags %}
+<span class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold {{ examen.estado|examen_estado_theme }}">
+    {% if examen.estado == "APROBADO" %}
+        <i class="fa-solid fa-circle-check"></i>
+    {% elif examen.estado == "DESAPROBADO" %}
+        <i class="fa-solid fa-circle-xmark"></i>
+    {% elif examen.estado == "AUSENTE" %}
+        <i class="fa-solid fa-user-clock"></i>
+    {% elif examen.estado == "ANULADO" %}
+        <i class="fa-solid fa-ban"></i>
+    {% else %}
+        <i class="fa-solid fa-hourglass-half"></i>
+    {% endif %}
+    {{ examen.get_estado_display }}
+</span>
