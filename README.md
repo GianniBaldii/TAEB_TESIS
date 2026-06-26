@@ -492,6 +492,101 @@ git status
 git branch --show-current
 ```
 
+### Entorno virtual local en Windows
+
+Cada vez que se abre una terminal nueva, el entorno virtual debe activarse de
+nuevo. Desde la raíz del proyecto:
+
+```powershell
+cd C:\proyectos\TAEB_TESIS
+.\.venv\Scripts\Activate.ps1
+```
+
+La terminal debe mostrar el prefijo:
+
+```text
+(.venv) PS C:\proyectos\TAEB_TESIS>
+```
+
+Si PowerShell bloquea la activación:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\.venv\Scripts\Activate.ps1
+```
+
+Comandos útiles con el entorno virtual activo:
+
+```powershell
+python --version
+python -m pip install -r requirements.txt
+python app\manage.py check --settings=config.settings.test
+```
+
+También se puede ejecutar Python del entorno virtual sin activarlo:
+
+```powershell
+.\.venv\Scripts\python.exe app\manage.py check --settings=config.settings.test
+```
+
+> Nota: GitHub CLI (`gh`) no depende del entorno virtual de Python. Puede usarse
+> con o sin `(.venv)`.
+
+### Autenticación con GitHub CLI
+
+GitHub no acepta contraseñas de cuenta para operaciones Git por HTTPS. Para
+evitar errores como:
+
+```text
+Invalid username or token. Password authentication is not supported for Git operations.
+```
+
+Instalar GitHub CLI en Windows:
+
+```powershell
+winget install --id GitHub.cli
+```
+
+Cerrar y abrir PowerShell de nuevo. Luego comprobar:
+
+```powershell
+gh --version
+```
+
+Iniciar sesión:
+
+```powershell
+gh auth login
+```
+
+Opciones recomendadas durante el login:
+
+```text
+GitHub.com
+HTTPS
+Login with a web browser
+```
+
+Si `gh` fue instalado pero PowerShell no lo reconoce, probar con la ruta
+directa:
+
+```powershell
+& "C:\Program Files\GitHub CLI\gh.exe" --version
+& "C:\Program Files\GitHub CLI\gh.exe" auth login
+```
+
+Si no se encuentra esa ruta, buscar el ejecutable:
+
+```powershell
+Get-ChildItem "C:\Program Files" -Recurse -Filter gh.exe -ErrorAction SilentlyContinue
+```
+
+Una vez autenticado, probar:
+
+```powershell
+git pull
+```
+
 ### Ramas principales
 
 El proyecto utiliza:
@@ -715,6 +810,44 @@ La dirección correcta debe ser:
 feature/nombre-de-la-tarea -> desarrollo
 ```
 
+Ejemplo real:
+
+```text
+taeb_modulo_alumnos -> desarrollo
+```
+
+En la pantalla de GitHub debe verse:
+
+```text
+base: desarrollo
+compare: nombre-de-la-rama
+```
+
+Título sugerido:
+
+```text
+Implementa módulo de alumnos, escuelas, exámenes y mejoras visuales
+```
+
+Descripción sugerida:
+
+```text
+## Resumen
+
+Describe brevemente qué se agregó o modificó.
+
+## Cambios principales
+
+- Cambio 1
+- Cambio 2
+- Cambio 3
+
+## Validaciones
+
+- Se ejecutó `manage.py check`
+- Se probaron manualmente las pantallas modificadas
+```
+
 En GitHub se llama **Pull Request**. **Merge Request** es el nombre utilizado
 por GitLab.
 
@@ -749,6 +882,42 @@ git fetch --prune
 `git branch -D` salvo que se tenga certeza de que sus cambios ya no son
 necesarios.
 
+### 11. Seguir trabajando después de mergear un Pull Request
+
+Luego de presionar **Merge pull request** en GitHub, actualizar `desarrollo` en
+la máquina local:
+
+```powershell
+git switch desarrollo
+git pull origin desarrollo
+```
+
+Crear una nueva rama desde `desarrollo` actualizado:
+
+```powershell
+git switch -c feature/nueva-tarea
+```
+
+Ejemplo:
+
+```powershell
+git switch -c taeb_modulo_clases_asistencia
+```
+
+Comprobar que todo quedó listo:
+
+```powershell
+git status
+git branch --show-current
+python app\manage.py check --settings=config.settings.test
+```
+
+Si la rama nueva todavía no existe en GitHub, el primer push debe incluir `-u`:
+
+```powershell
+git push -u origin feature/nueva-tarea
+```
+
 ### Flujo resumido
 
 ```powershell
@@ -776,6 +945,24 @@ git push -u origin feature/nombre-de-la-tarea
 
 # Crear en GitHub:
 # feature/nombre-de-la-tarea -> desarrollo
+```
+
+### Flujo resumido después de mergear un Pull Request
+
+```powershell
+# Activar entorno local, si se va a ejecutar Django localmente
+.\.venv\Scripts\Activate.ps1
+
+# Actualizar desarrollo con el merge hecho en GitHub
+git switch desarrollo
+git pull origin desarrollo
+
+# Crear una rama nueva
+git switch -c feature/nueva-tarea
+
+# Verificar estado
+git status
+python app\manage.py check --settings=config.settings.test
 ```
 
 ## Dumps de MySQL
