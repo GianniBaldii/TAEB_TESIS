@@ -1,0 +1,24 @@
+<section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <p class="text-sm font-semibold uppercase tracking-wide text-blue-700">Línea de vida taekwondista</p>
+            <h2 class="mt-1 text-2xl font-black text-slate-950">Historial de cinturones</h2>
+        </div>
+        <p class="text-sm text-slate-500">Ordenado cronológicamente</p>
+    </div>
+
+    {% if analisis_trayectoria.timeline_historial %}
+    <div class="relative mt-6 space-y-5 before:absolute before:left-5 before:top-2 before:h-[calc(100%-1rem)] before:w-0.5 before:bg-blue-100">
+        {% for item in analisis_trayectoria.timeline_historial %}
+            {% include "alumnos/partials/historial/timeline_historial_item.html" with item=item %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+        <p class="text-lg font-bold text-slate-900">Sin historial registrado todavía</p>
+        <p class="mt-2 text-sm text-slate-500">
+            Cuando el alumno apruebe exámenes o se carguen promociones históricas, su recorrido aparecerá como una línea temporal.
+        </p>
+    </div>
+    {% endif %}
+</section>

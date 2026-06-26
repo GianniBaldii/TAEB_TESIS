@@ -1,20 +1,39 @@
-<tr>
-    <td class="px-4 py-3">{{ examen.fecha_examen|date:"d/m/Y" }}</td>
-    <td class="px-4 py-3">{{ examen.cinturon_origen }}</td>
-    <td class="px-4 py-3">{% include "alumnos/partials/belt_badge.html" with cinturon=examen.cinturon_destino %}</td>
-    <td class="px-4 py-3">{% if examen.es_historico %}Historico{% else %}Actual{% endif %}</td>
-    <td class="px-4 py-3">{% include "alumnos/partials/examen_estado_badge.html" %}</td>
-    <td class="px-4 py-3">{{ examen.nota_final|default:"-" }}</td>
-    <td class="px-4 py-3">{{ examen.resultado_final|default:"-" }}</td>
-    <td class="px-4 py-3">{{ examen.lugar|default:"-" }}</td>
-    <td class="px-4 py-3">
-        <div class="flex flex-wrap gap-2">
-            <a class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-50" href="{% url 'alumnos:examen_detail' alumno.pk examen.pk %}">Ver</a>
+<tr class="transition hover:bg-slate-50/80">
+    <td class="px-4 py-4">
+        <div class="flex items-center gap-3">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+                <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <div>
+                <p class="font-bold text-slate-950">{{ examen.fecha_examen|date:"d/m/Y" }}</p>
+                <p class="text-xs text-slate-500">{% if examen.es_historico %}Histórico{% else %}Actual{% endif %}</p>
+            </div>
+        </div>
+    </td>
+    <td class="px-4 py-4 text-slate-600">{{ examen.cinturon_origen }}</td>
+    <td class="px-4 py-4">{% include "alumnos/partials/belt_badge.html" with cinturon=examen.cinturon_destino %}</td>
+    <td class="px-4 py-4">{% include "alumnos/partials/examen_estado_badge.html" %}</td>
+    <td class="px-4 py-4">
+        <div class="flex flex-col gap-1 text-slate-600">
+            <span><i class="fa-solid fa-star mr-1 text-slate-300"></i>{{ examen.nota_final|default:"-" }}</span>
+            <span><i class="fa-solid fa-clipboard-check mr-1 text-slate-300"></i>{{ examen.resultado_final|default:"-" }}</span>
+        </div>
+    </td>
+    <td class="px-4 py-4 text-slate-600">
+        <i class="fa-solid fa-location-dot mr-1 text-slate-300"></i>{{ examen.lugar|default:"-" }}
+    </td>
+    <td class="px-4 py-4">
+        <div class="flex justify-end gap-2">
+            <a class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100" href="{% url 'alumnos:examen_detail' alumno.pk examen.pk %}" title="Ver examen">
+                <i class="fa-solid fa-eye"></i>
+            </a>
             {% if examen.estado == "PENDIENTE" %}
-            <a class="rounded-md border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50" href="{% url 'alumnos:examen_evaluaciones' alumno.pk examen.pk %}">Evaluar</a>
-            <form method="post" action="{% url 'alumnos:examen_aprobar' alumno.pk examen.pk %}">{% csrf_token %}<button class="rounded-md border border-green-200 px-2.5 py-1 text-xs font-semibold text-green-700 hover:bg-green-50">Aprobar</button></form>
-            <form method="post" action="{% url 'alumnos:examen_desaprobar' alumno.pk examen.pk %}">{% csrf_token %}<button class="rounded-md border border-amber-200 px-2.5 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-50">Desaprobar</button></form>
-            <form method="post" action="{% url 'alumnos:examen_anular' alumno.pk examen.pk %}">{% csrf_token %}<button class="rounded-md border border-red-200 px-2.5 py-1 text-xs font-semibold text-red-700 hover:bg-red-50">Anular</button></form>
+            <a class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50" href="{% url 'alumnos:examen_evaluaciones' alumno.pk examen.pk %}" title="Evaluar">
+                <i class="fa-solid fa-clipboard-list"></i>
+            </a>
+            <form method="post" action="{% url 'alumnos:examen_aprobar' alumno.pk examen.pk %}">{% csrf_token %}<button class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-green-200 bg-green-50 text-green-700 hover:bg-green-100" title="Aprobar"><i class="fa-solid fa-check"></i></button></form>
+            <form method="post" action="{% url 'alumnos:examen_desaprobar' alumno.pk examen.pk %}">{% csrf_token %}<button class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100" title="Desaprobar"><i class="fa-solid fa-xmark"></i></button></form>
+            <form method="post" action="{% url 'alumnos:examen_anular' alumno.pk examen.pk %}">{% csrf_token %}<button class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100" title="Anular"><i class="fa-solid fa-ban"></i></button></form>
             {% endif %}
         </div>
     </td>

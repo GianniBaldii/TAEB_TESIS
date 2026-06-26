@@ -1,0 +1,18 @@
+{% load alumno_tags %}
+{% with theme=cinturon|belt_theme %}
+<div class="relative overflow-hidden rounded-2xl border {{ theme.container }} shadow-sm">
+    <div class="flex items-center gap-4 p-4">
+        {% include "alumnos/partials/components/cinturon_tira.html" with cinturon=cinturon %}
+        <div class="min-w-0">
+            <p class="truncate text-sm font-bold">{{ cinturon.nombre|default:"Sin cinturón" }}</p>
+            <p class="text-xs opacity-75">
+                {% if cinturon %}
+                    {% if cinturon.tipo_rango == "DAN" %}{{ cinturon.numeracion }}° dan{% else %}{{ cinturon.numeracion }}° gup{% endif %}
+                {% else %}
+                    Sin graduación
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+{% endwith %}

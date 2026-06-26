@@ -72,6 +72,16 @@ class ExamenAlumnoServiceTests(TestCase):
                 es_historico=True,
             )
 
+    def test_no_permite_historico_para_cinturon_ya_aprobado(self):
+        self._examen(self.amarillo, Examen.Estado.APROBADO)
+        with self.assertRaises(AlumnosError):
+            crear_examen_para_alumno(
+                self.alumno,
+                date.today(),
+                cinturon_destino=self.amarillo,
+                es_historico=True,
+            )
+
     def test_no_permite_duplicar_examen_historico_en_la_misma_fecha(self):
         crear_examen_para_alumno(self.alumno, date.today(), cinturon_destino=self.amarillo, es_historico=True)
         with self.assertRaises(AlumnosError):

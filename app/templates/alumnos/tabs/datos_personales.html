@@ -1,16 +1,146 @@
-<div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-    <dl class="grid gap-4 md:grid-cols-2">
-        <div><dt class="text-sm font-medium text-slate-500">Nombre</dt><dd class="mt-1 text-slate-900">{{ alumno.nombre }}</dd></div>
-        <div><dt class="text-sm font-medium text-slate-500">Apellido</dt><dd class="mt-1 text-slate-900">{{ alumno.apellido }}</dd></div>
-        <div><dt class="text-sm font-medium text-slate-500">DNI</dt><dd class="mt-1 text-slate-900">{{ alumno.dni }}</dd></div>
-        <div><dt class="text-sm font-medium text-slate-500">Fecha de nacimiento</dt><dd class="mt-1 text-slate-900">{{ alumno.fecha_nacimiento|date:"d/m/Y"|default:"-" }}</dd></div>
-        <div><dt class="text-sm font-medium text-slate-500">Inicio en Taekwondo</dt><dd class="mt-1 text-slate-900">{{ alumno.fecha_inicio_taekwondo|date:"d/m/Y"|default:"-" }}</dd></div>
-        <div><dt class="text-sm font-medium text-slate-500">Email</dt><dd class="mt-1 text-slate-900">{{ alumno.email|default:"-" }}</dd></div>
-        <div><dt class="text-sm font-medium text-slate-500">Telefono</dt><dd class="mt-1 text-slate-900">{{ alumno.telefono|default:"-" }}</dd></div>
-        <div class="md:col-span-2"><dt class="text-sm font-medium text-slate-500">Direccion</dt><dd class="mt-1 text-slate-900">{{ alumno.direccion|default:"-" }}</dd></div>
-        <div><dt class="text-sm font-medium text-slate-500">Peso aproximado</dt><dd class="mt-1 text-slate-900">{{ alumno.peso_aproximado|default:"-" }}</dd></div>
-        <div><dt class="text-sm font-medium text-slate-500">Altura aproximada</dt><dd class="mt-1 text-slate-900">{{ alumno.altura_aproximada|default:"-" }}</dd></div>
-        <div><dt class="text-sm font-medium text-slate-500">Cinturon actual</dt><dd class="mt-1 text-slate-900">{{ alumno.cinturon_actual|default:"-" }}</dd></div>
-        <div><dt class="text-sm font-medium text-slate-500">Estado</dt><dd class="mt-1 text-slate-900">{% if alumno.activo %}Activo{% else %}Inactivo{% endif %}</dd></div>
-    </dl>
+<div class="space-y-5">
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-100 bg-gradient-to-r from-blue-50 via-white to-slate-50 p-6">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-700 text-xl text-white shadow-sm">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-blue-700">Datos personales</p>
+                        <h2 class="text-2xl font-black text-slate-950">{{ alumno.apellido }}, {{ alumno.nombre }}</h2>
+                        <p class="mt-1 text-sm text-slate-500">Información general, contacto y datos físicos del alumno.</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    {% include "alumnos/partials/belt_badge.html" with cinturon=alumno.cinturon_actual %}
+                    <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold {% if alumno.activo %}border-green-200 bg-green-50 text-green-700{% else %}border-slate-200 bg-slate-100 text-slate-600{% endif %}">
+                        <i class="fa-solid {% if alumno.activo %}fa-circle-check{% else %}fa-circle-pause{% endif %}"></i>
+                        {% if alumno.activo %}Activo{% else %}Inactivo{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid gap-4 p-6 md:grid-cols-2 xl:grid-cols-3">
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div class="flex items-start gap-3">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+                        <i class="fa-solid fa-id-card"></i>
+                    </span>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">DNI</p>
+                        <p class="mt-1 font-bold text-slate-950">{{ alumno.dni }}</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div class="flex items-start gap-3">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
+                        <i class="fa-solid fa-cake-candles"></i>
+                    </span>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Fecha de nacimiento</p>
+                        <p class="mt-1 font-bold text-slate-950">{{ alumno.fecha_nacimiento|date:"d/m/Y"|default:"-" }}</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div class="flex items-start gap-3">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                        <i class="fa-solid fa-medal"></i>
+                    </span>
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Inicio en Taekwondo</p>
+                        <p class="mt-1 font-bold text-slate-950">{{ alumno.fecha_inicio_taekwondo|date:"d/m/Y"|default:"-" }}</p>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <section class="grid gap-5 lg:grid-cols-2">
+        <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="mb-5 flex items-center gap-3">
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                    <i class="fa-solid fa-address-book"></i>
+                </span>
+                <div>
+                    <h3 class="text-lg font-black text-slate-950">Contacto</h3>
+                    <p class="text-sm text-slate-500">Canales para comunicarse con el alumno.</p>
+                </div>
+            </div>
+
+            <dl class="space-y-4">
+                <div class="flex gap-3 rounded-xl bg-slate-50 p-4">
+                    <i class="fa-solid fa-envelope mt-1 text-slate-400"></i>
+                    <div>
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Email</dt>
+                        <dd class="mt-1 font-semibold text-slate-900">{{ alumno.email|default:"-" }}</dd>
+                    </div>
+                </div>
+                <div class="flex gap-3 rounded-xl bg-slate-50 p-4">
+                    <i class="fa-solid fa-phone mt-1 text-slate-400"></i>
+                    <div>
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Teléfono</dt>
+                        <dd class="mt-1 font-semibold text-slate-900">{{ alumno.telefono|default:"-" }}</dd>
+                    </div>
+                </div>
+                <div class="flex gap-3 rounded-xl bg-slate-50 p-4">
+                    <i class="fa-solid fa-location-dot mt-1 text-slate-400"></i>
+                    <div>
+                        <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Dirección</dt>
+                        <dd class="mt-1 font-semibold text-slate-900">{{ alumno.direccion|default:"-" }}</dd>
+                    </div>
+                </div>
+            </dl>
+        </article>
+
+        <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="mb-5 flex items-center gap-3">
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-100 text-orange-700">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                </span>
+                <div>
+                    <h3 class="text-lg font-black text-slate-950">Datos físicos</h3>
+                    <p class="text-sm text-slate-500">Referencias aproximadas para seguimiento.</p>
+                </div>
+            </div>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-weight-scale text-xl text-orange-600"></i>
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Peso aproximado</p>
+                            <p class="mt-1 text-2xl font-black text-slate-950">
+                                {{ alumno.peso_aproximado|default:"-" }}
+                                {% if alumno.peso_aproximado %}<span class="text-sm font-semibold text-slate-500">kg</span>{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-ruler-vertical text-xl text-orange-600"></i>
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Altura aproximada</p>
+                            <p class="mt-1 text-2xl font-black text-slate-950">
+                                {{ alumno.altura_aproximada|default:"-" }}
+                                {% if alumno.altura_aproximada %}<span class="text-sm font-semibold text-slate-500">m</span>{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Cinturón actual</p>
+                {% include "alumnos/partials/components/cinturon_visual.html" with cinturon=alumno.cinturon_actual %}
+            </div>
+        </article>
+    </section>
 </div>

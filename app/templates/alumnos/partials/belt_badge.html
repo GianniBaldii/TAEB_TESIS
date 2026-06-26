@@ -1,7 +1,7 @@
 {% load alumno_tags %}
 {% with theme=cinturon|belt_theme %}
 <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold {{ theme.badge }}">
-    <span class="h-2 w-2 rounded-full {{ theme.accent }}"></span>
-    {{ cinturon.nombre|default:"Sin cinturon" }}
+    {% include "alumnos/partials/components/cinturon_tira.html" with cinturon=cinturon size="sm" %}
+    {{ cinturon.nombre|default:"Sin cinturón" }}
 </span>
 {% endwith %}

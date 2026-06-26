@@ -4,75 +4,227 @@
 
 {% block contenido %}
 <section class="space-y-5">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-        <div>
-            <p class="text-sm font-semibold text-blue-600">Alumnos</p>
-            <h1 class="text-2xl font-bold text-slate-900">Informacion de alumnos</h1>
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-100 bg-gradient-to-r from-blue-50 via-white to-slate-50 p-6">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-700 text-xl text-white shadow-sm">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-blue-700">Alumnos</p>
+                        <h1 class="text-2xl font-black text-slate-950">Información de alumnos</h1>
+                        <p class="mt-1 text-sm text-slate-500">Buscá, filtrá y administrá las fichas de tus alumnos.</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm">
+                        <i class="fa-solid fa-list-check text-blue-600"></i>
+                        {{ inscripciones|length }} resultado{% if inscripciones|length != 1 %}s{% endif %}
+                    </span>
+                    <a href="{% url 'alumnos:alumno_create' %}" class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800">
+                        <i class="fa-solid fa-user-plus"></i>
+                        Nuevo alumno
+                    </a>
+                </div>
+            </div>
         </div>
-        <a href="{% url 'alumnos:alumno_create' %}" class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Nuevo alumno</a>
+
+        <form method="get" class="grid gap-3 p-5 md:grid-cols-2 xl:grid-cols-5">
+            <label class="relative xl:col-span-2">
+                <span class="sr-only">Buscar alumno</span>
+                <i class="fa-solid fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input name="q" value="{{ filtros.q }}" placeholder="Nombre, apellido o DNI" class="block w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+            </label>
+
+            <label class="relative">
+                <span class="sr-only">Estado</span>
+                <i class="fa-solid fa-toggle-on pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <select name="activo" class="block w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                    <option value="">Todos los estados</option>
+                    <option value="1" {% if filtros.activo == "1" %}selected{% endif %}>Activos</option>
+                    <option value="0" {% if filtros.activo == "0" %}selected{% endif %}>Inactivos</option>
+                </select>
+            </label>
+
+            <label class="relative">
+                <span class="sr-only">Cinturón</span>
+                <i class="fa-solid fa-award pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <select name="cinturon" class="block w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                    <option value="">Todos los cinturones</option>
+                    {% for cinturon in cinturones %}
+                        <option value="{{ cinturon.id }}" {% if filtros.cinturon == cinturon.id|stringformat:"s" %}selected{% endif %}>{{ cinturon.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            {% if request.user.is_superuser %}
+            <label class="relative">
+                <span class="sr-only">Escuela</span>
+                <i class="fa-solid fa-school pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <select name="escuela" class="block w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                    <option value="">Todas las escuelas</option>
+                    {% for escuela in escuelas %}
+                        <option value="{{ escuela.pk }}" {% if filtros.escuela == escuela.pk|stringformat:"s" %}selected{% endif %}>{{ escuela }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            {% endif %}
+
+            <div class="flex gap-2 {% if not request.user.is_superuser %}xl:col-start-5{% endif %}">
+                <button class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                    <i class="fa-solid fa-filter"></i>
+                    Filtrar
+                </button>
+                <a href="{% url 'alumnos:alumno_list' %}" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-500 shadow-sm hover:bg-slate-50" title="Limpiar filtros">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </a>
+            </div>
+        </form>
     </div>
 
-    <form method="get" class="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-4">
-        <input name="q" value="{{ filtros.q }}" placeholder="Nombre, apellido o DNI" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
-        <select name="activo" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
-            <option value="">Todos los estados</option>
-            <option value="1" {% if filtros.activo == "1" %}selected{% endif %}>Activos</option>
-            <option value="0" {% if filtros.activo == "0" %}selected{% endif %}>Inactivos</option>
-        </select>
-        <select name="cinturon" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
-            <option value="">Todos los cinturones</option>
-            {% for cinturon in cinturones %}
-                <option value="{{ cinturon.id }}" {% if filtros.cinturon == cinturon.id|stringformat:"s" %}selected{% endif %}>{{ cinturon.nombre }}</option>
-            {% endfor %}
-        </select>
-        {% if request.user.is_superuser %}<select name="escuela" class="rounded-lg border border-slate-300 px-3 py-2 text-sm"><option value="">Todas las escuelas</option>{% for escuela in escuelas %}<option value="{{ escuela.pk }}" {% if filtros.escuela == escuela.pk|stringformat:"s" %}selected{% endif %}>{{ escuela }}</option>{% endfor %}</select>{% endif %}
-        <button class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Filtrar</button>
-    </form>
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="hidden overflow-x-auto lg:block">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <tr>
+                        <th class="px-4 py-3">Alumno</th>
+                        <th class="px-4 py-3">Cinturón</th>
+                        {% if request.user.is_superuser %}<th class="px-4 py-3">Escuela</th>{% endif %}
+                        <th class="px-4 py-3">Nacimiento</th>
+                        <th class="px-4 py-3">Datos físicos</th>
+                        <th class="px-4 py-3">Contacto</th>
+                        <th class="px-4 py-3">Estado</th>
+                        <th class="px-4 py-3 text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for inscripcion in inscripciones %}{% with alumno=inscripcion.alumno %}
+                    <tr class="transition hover:bg-slate-50/80">
+                        <td class="px-4 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
+                                    <i class="fa-solid fa-user-graduate"></i>
+                                </div>
+                                <div>
+                                    <p class="font-bold text-slate-950">{{ alumno.apellido }}, {{ alumno.nombre }}</p>
+                                    <p class="text-xs text-slate-500">DNI {{ alumno.dni }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-4 py-4">{% include "alumnos/partials/belt_badge.html" with cinturon=alumno.cinturon_actual %}</td>
+                        {% if request.user.is_superuser %}<td class="px-4 py-4 text-slate-600">{{ inscripcion.escuela }}</td>{% endif %}
+                        <td class="px-4 py-4 text-slate-600">
+                            <i class="fa-solid fa-cake-candles mr-1 text-slate-300"></i>
+                            {{ alumno.fecha_nacimiento|date:"d/m/Y"|default:"-" }}
+                        </td>
+                        <td class="px-4 py-4 text-slate-600">
+                            <div class="flex flex-col gap-1">
+                                <span><i class="fa-solid fa-weight-scale mr-1 text-slate-300"></i>{{ alumno.peso_aproximado|default:"-" }}{% if alumno.peso_aproximado %} kg{% endif %}</span>
+                                <span><i class="fa-solid fa-ruler-vertical mr-1 text-slate-300"></i>{{ alumno.altura_aproximada|default:"-" }}{% if alumno.altura_aproximada %} m{% endif %}</span>
+                            </div>
+                        </td>
+                        <td class="px-4 py-4 text-slate-600">
+                            <div class="flex flex-col gap-1">
+                                <span><i class="fa-solid fa-phone mr-1 text-slate-300"></i>{{ alumno.telefono|default:"-" }}</span>
+                                <span class="max-w-48 truncate"><i class="fa-solid fa-envelope mr-1 text-slate-300"></i>{{ alumno.email|default:"-" }}</span>
+                            </div>
+                        </td>
+                        <td class="px-4 py-4">
+                            <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold {% if inscripcion.activo %}border-green-200 bg-green-50 text-green-700{% else %}border-slate-200 bg-slate-100 text-slate-600{% endif %}">
+                                <i class="fa-solid {% if inscripcion.activo %}fa-circle-check{% else %}fa-circle-pause{% endif %}"></i>
+                                {% if inscripcion.activo %}Activo{% else %}Inactivo{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-4 py-4">
+                            <div class="flex justify-end gap-2">
+                                <a class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100" href="{% url 'alumnos:alumno_detail' alumno.pk %}" title="Ficha">
+                                    <i class="fa-solid fa-address-card"></i>
+                                </a>
+                                <a class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50" href="{% url 'alumnos:alumno_update' alumno.pk %}" title="Editar">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                {% if inscripcion.activo %}
+                                <form method="post" action="{% url 'alumnos:alumno_baja' alumno.pk %}">{% csrf_token %}<button class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100" title="Dar de baja"><i class="fa-solid fa-user-slash"></i></button></form>
+                                {% else %}
+                                <form method="post" action="{% url 'alumnos:alumno_reactivar' alumno.pk %}">{% csrf_token %}<button class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-green-200 bg-green-50 text-green-700 hover:bg-green-100" title="Reactivar"><i class="fa-solid fa-user-check"></i></button></form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endwith %}
+                    {% empty %}
+                    <tr>
+                        <td colspan="{% if request.user.is_superuser %}8{% else %}7{% endif %}" class="px-4 py-12 text-center">
+                            <div class="mx-auto flex max-w-md flex-col items-center">
+                                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                                    <i class="fa-solid fa-user-magnifying-glass text-xl"></i>
+                                </div>
+                                <p class="mt-3 font-bold text-slate-900">No hay alumnos para mostrar</p>
+                                <p class="mt-1 text-sm text-slate-500">Probá ajustar los filtros o crear un nuevo alumno.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-    <div class="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-        <table class="min-w-full divide-y divide-slate-200 text-sm">
-            <thead class="bg-slate-50 text-left text-xs font-semibold uppercase text-slate-500">
-                <tr>
-                    <th class="px-4 py-3">Apellido y nombre</th>
-                    <th class="px-4 py-3">DNI</th>
-                    <th class="px-4 py-3">Cinturon</th>
-                    <th class="px-4 py-3">Nacimiento</th>
-                    <th class="px-4 py-3">Peso</th>
-                    <th class="px-4 py-3">Altura</th>
-                    <th class="px-4 py-3">Telefono</th>
-                    <th class="px-4 py-3">Estado</th>
-                    <th class="px-4 py-3">Acciones</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-                {% for inscripcion in inscripciones %}{% with alumno=inscripcion.alumno %}
-                <tr>
-                    <td class="px-4 py-3 font-medium text-slate-900">{{ alumno.apellido }}, {{ alumno.nombre }}</td>
-                    <td class="px-4 py-3">{{ alumno.dni }}</td>
-                    <td class="px-4 py-3">{{ alumno.cinturon_actual|default:"-" }}</td>
-                    <td class="px-4 py-3">{{ alumno.fecha_nacimiento|date:"d/m/Y"|default:"-" }}</td>
-                    <td class="px-4 py-3">{{ alumno.peso_aproximado|default:"-" }}</td>
-                    <td class="px-4 py-3">{{ alumno.altura_aproximada|default:"-" }}</td>
-                    <td class="px-4 py-3">{{ alumno.telefono|default:"-" }}</td>
-                    <td class="px-4 py-3">{% if inscripcion.activo %}Activo{% else %}Inactivo{% endif %}</td>
-                    <td class="px-4 py-3">
-                        <div class="flex flex-wrap gap-2">
-                            <a class="text-blue-700 hover:underline" href="{% url 'alumnos:alumno_detail' alumno.pk %}">Ficha</a>
-                            <a class="text-slate-700 hover:underline" href="{% url 'alumnos:alumno_update' alumno.pk %}">Editar</a>
-                            {% if inscripcion.activo %}
-                            <form method="post" action="{% url 'alumnos:alumno_baja' alumno.pk %}">{% csrf_token %}<button class="text-red-700 hover:underline">Baja</button></form>
-                            {% else %}
-                            <form method="post" action="{% url 'alumnos:alumno_reactivar' alumno.pk %}">{% csrf_token %}<button class="text-green-700 hover:underline">Reactivar</button></form>
-                            {% endif %}
+        <div class="grid gap-3 p-4 lg:hidden">
+            {% for inscripcion in inscripciones %}{% with alumno=inscripcion.alumno %}
+            <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
+                            <i class="fa-solid fa-user-graduate"></i>
                         </div>
-                    </td>
-                </tr>
-                {% endwith %}
-                {% empty %}
-                <tr><td colspan="9" class="px-4 py-8 text-center text-slate-500">No hay alumnos para mostrar.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        <div>
+                            <p class="font-bold text-slate-950">{{ alumno.apellido }}, {{ alumno.nombre }}</p>
+                            <p class="text-xs text-slate-500">DNI {{ alumno.dni }}</p>
+                        </div>
+                    </div>
+                    <span class="inline-flex items-center rounded-full border px-2 py-1 text-xs font-bold {% if inscripcion.activo %}border-green-200 bg-green-50 text-green-700{% else %}border-slate-200 bg-slate-100 text-slate-600{% endif %}">
+                        {% if inscripcion.activo %}Activo{% else %}Inactivo{% endif %}
+                    </span>
+                </div>
+
+                <div class="mt-4">{% include "alumnos/partials/belt_badge.html" with cinturon=alumno.cinturon_actual %}</div>
+
+                <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+                    {% if request.user.is_superuser %}
+                    <div class="rounded-xl bg-slate-50 p-3"><dt class="text-xs font-semibold uppercase text-slate-500">Escuela</dt><dd class="mt-1 text-slate-800">{{ inscripcion.escuela }}</dd></div>
+                    {% endif %}
+                    <div class="rounded-xl bg-slate-50 p-3"><dt class="text-xs font-semibold uppercase text-slate-500">Nacimiento</dt><dd class="mt-1 text-slate-800">{{ alumno.fecha_nacimiento|date:"d/m/Y"|default:"-" }}</dd></div>
+                    <div class="rounded-xl bg-slate-50 p-3"><dt class="text-xs font-semibold uppercase text-slate-500">Teléfono</dt><dd class="mt-1 text-slate-800">{{ alumno.telefono|default:"-" }}</dd></div>
+                    <div class="rounded-xl bg-slate-50 p-3"><dt class="text-xs font-semibold uppercase text-slate-500">Físico</dt><dd class="mt-1 text-slate-800">{{ alumno.peso_aproximado|default:"-" }}{% if alumno.peso_aproximado %} kg{% endif %} · {{ alumno.altura_aproximada|default:"-" }}{% if alumno.altura_aproximada %} m{% endif %}</dd></div>
+                </dl>
+
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <a class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700" href="{% url 'alumnos:alumno_detail' alumno.pk %}">
+                        <i class="fa-solid fa-address-card"></i>
+                        Ficha
+                    </a>
+                    <a class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700" href="{% url 'alumnos:alumno_update' alumno.pk %}">
+                        <i class="fa-solid fa-pen"></i>
+                        Editar
+                    </a>
+                    {% if inscripcion.activo %}
+                    <form method="post" action="{% url 'alumnos:alumno_baja' alumno.pk %}" class="flex-1">{% csrf_token %}<button class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700"><i class="fa-solid fa-user-slash"></i>Baja</button></form>
+                    {% else %}
+                    <form method="post" action="{% url 'alumnos:alumno_reactivar' alumno.pk %}" class="flex-1">{% csrf_token %}<button class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-sm font-semibold text-green-700"><i class="fa-solid fa-user-check"></i>Reactivar</button></form>
+                    {% endif %}
+                </div>
+            </article>
+            {% endwith %}
+            {% empty %}
+            <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
+                <i class="fa-solid fa-user-magnifying-glass text-3xl text-slate-300"></i>
+                <p class="mt-3 font-bold text-slate-900">No hay alumnos para mostrar</p>
+                <p class="mt-1 text-sm text-slate-500">Probá ajustar los filtros o crear un nuevo alumno.</p>
+            </div>
+            {% endfor %}
+        </div>
     </div>
 </section>
 {% endblock %}

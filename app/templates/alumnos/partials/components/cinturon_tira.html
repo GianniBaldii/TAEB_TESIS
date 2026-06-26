@@ -1,0 +1,40 @@
+<div class="relative shrink-0 overflow-hidden rounded-md border border-slate-300 shadow-inner {% if size == 'sm' %}h-4 w-10{% else %}h-10 w-28{% endif %}">
+    {% if cinturon %}
+        {% if cinturon.tipo_rango == "DAN" %}
+            <div class="absolute inset-0 bg-slate-950"></div>
+            <div class="absolute inset-x-0 top-1/2 h-1 -translate-y-1/2 bg-yellow-400"></div>
+        {% elif cinturon.numeracion == 10 %}
+            <div class="absolute inset-0 bg-white"></div>
+        {% elif cinturon.numeracion == 9 %}
+            <div class="absolute inset-y-0 left-0 w-1/2 bg-white"></div>
+            <div class="absolute inset-y-0 right-0 w-1/2 bg-yellow-400"></div>
+        {% elif cinturon.numeracion == 8 %}
+            <div class="absolute inset-0 bg-yellow-400"></div>
+        {% elif cinturon.numeracion == 7 %}
+            <div class="absolute inset-y-0 left-0 w-1/2 bg-yellow-400"></div>
+            <div class="absolute inset-y-0 right-0 w-1/2 bg-green-600"></div>
+        {% elif cinturon.numeracion == 6 %}
+            <div class="absolute inset-0 bg-green-600"></div>
+        {% elif cinturon.numeracion == 5 %}
+            <div class="absolute inset-y-0 left-0 w-1/2 bg-green-600"></div>
+            <div class="absolute inset-y-0 right-0 w-1/2 bg-blue-600"></div>
+        {% elif cinturon.numeracion == 4 %}
+            <div class="absolute inset-0 bg-blue-600"></div>
+        {% elif cinturon.numeracion == 3 %}
+            <div class="absolute inset-y-0 left-0 w-1/2 bg-blue-600"></div>
+            <div class="absolute inset-y-0 right-0 w-1/2 bg-red-600"></div>
+        {% elif cinturon.numeracion == 2 %}
+            <div class="absolute inset-0 bg-red-600"></div>
+        {% elif cinturon.numeracion == 1 %}
+            <div class="absolute inset-y-0 left-0 w-1/2 bg-red-600"></div>
+            <div class="absolute inset-y-0 right-0 w-1/2 bg-slate-950"></div>
+        {% else %}
+            <div class="absolute inset-0 bg-slate-300"></div>
+        {% endif %}
+    {% else %}
+        <div class="absolute inset-0 bg-slate-200"></div>
+    {% endif %}
+
+    <div class="absolute inset-x-1 top-1/2 h-px -translate-y-1/2 bg-white/60"></div>
+    <div class="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-slate-900/15"></div>
+</div>

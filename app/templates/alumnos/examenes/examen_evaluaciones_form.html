@@ -6,63 +6,96 @@
 {% include "alumnos/partials/examen_breadcrumb.html" %}
 <form method="post" class="space-y-5">
     {% csrf_token %}
-    <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-            <div>
-                <p class="text-sm font-semibold text-blue-600">{{ alumno }}</p>
-                <h1 class="text-2xl font-bold text-slate-900">Cargar evaluaciones</h1>
-                <div class="mt-2 flex flex-wrap items-center gap-2">
-                    {% include "alumnos/partials/examen_estado_badge.html" %}
-                    {% include "alumnos/partials/belt_badge.html" with cinturon=examen.cinturon_destino %}
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-100 bg-gradient-to-r from-blue-50 via-white to-slate-50 p-6">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div class="flex items-start gap-4">
+                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-700 text-xl text-white shadow-sm">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-blue-700">{{ alumno }}</p>
+                        <h1 class="text-2xl font-black text-slate-950">Cargar evaluaciones</h1>
+                        <div class="mt-3 flex flex-wrap items-center gap-2">
+                            {% include "alumnos/partials/examen_estado_badge.html" %}
+                            {% include "alumnos/partials/belt_badge.html" with cinturon=examen.cinturon_destino %}
+                        </div>
+                    </div>
                 </div>
+                <a href="{% url 'alumnos:alumno_detail' alumno.pk %}" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    Volver a la ficha
+                </a>
             </div>
-            <a href="{% url 'alumnos:alumno_detail' alumno.pk %}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Volver a la ficha</a>
         </div>
-        <div class="mt-4 grid gap-4 md:grid-cols-3">
-            <div><label class="mb-1 block text-sm font-medium text-slate-700">Nota final</label><input name="nota_final" type="number" step="0.01" value="{{ examen.nota_final|default_if_none:'' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"></div>
-            <div><label class="mb-1 block text-sm font-medium text-slate-700">Resultado final</label>{% if examen.cinturon_destino.tipo_rango == "GUP" %}<select name="resultado_final" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"><option value="">Sin evaluar</option>{% for concepto in conceptos_gup_validos %}<option value="{{ concepto }}" {% if examen.resultado_final == concepto %}selected{% endif %}>{{ concepto }}</option>{% endfor %}</select>{% else %}<input name="resultado_final" value="{{ examen.resultado_final|default_if_none:'' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">{% endif %}</div>
-            <div><label class="mb-1 block text-sm font-medium text-slate-700">Observaciones</label><input name="observaciones" value="{{ examen.observaciones|default_if_none:'' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"></div>
+
+        <div class="grid gap-4 p-6 md:grid-cols-3">
+            <div>
+                <label class="mb-1.5 flex items-center gap-2 text-sm font-semibold text-slate-700"><i class="fa-solid fa-star text-slate-400"></i>Nota final</label>
+                <input name="nota_final" type="number" step="0.01" value="{{ examen.nota_final|default_if_none:'' }}" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+            </div>
+            <div>
+                <label class="mb-1.5 flex items-center gap-2 text-sm font-semibold text-slate-700"><i class="fa-solid fa-clipboard-check text-slate-400"></i>Resultado final</label>
+                {% if examen.cinturon_destino.tipo_rango == "GUP" %}
+                <select name="resultado_final" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"><option value="">Sin evaluar</option>{% for concepto in conceptos_gup_validos %}<option value="{{ concepto }}" {% if examen.resultado_final == concepto %}selected{% endif %}>{{ concepto }}</option>{% endfor %}</select>
+                {% else %}
+                <input name="resultado_final" value="{{ examen.resultado_final|default_if_none:'' }}" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                {% endif %}
+            </div>
+            <div>
+                <label class="mb-1.5 flex items-center gap-2 text-sm font-semibold text-slate-700"><i class="fa-solid fa-comment-dots text-slate-400"></i>Observaciones</label>
+                <input name="observaciones" value="{{ examen.observaciones|default_if_none:'' }}" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+            </div>
         </div>
     </div>
 
     {% regroup detalles by template_item.seccion as secciones %}
     {% for seccion in secciones %}
-    <section class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 class="text-lg font-semibold text-slate-900">{{ seccion.grouper.nombre }}</h2>
-        <div class="mt-4 space-y-4">
+    <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-200 bg-slate-50 px-6 py-4">
+            <h2 class="flex items-center gap-2 text-lg font-black text-slate-950"><i class="fa-solid fa-layer-group text-blue-600"></i>{{ seccion.grouper.nombre }}</h2>
+            {% if seccion.grouper.descripcion %}<p class="mt-1 text-sm text-slate-500">{{ seccion.grouper.descripcion }}</p>{% endif %}
+        </div>
+        <div class="divide-y divide-slate-100">
             {% for detalle in seccion.list %}
-            <div class="grid gap-3 rounded-lg border border-slate-200 p-4 md:grid-cols-3">
+            <div class="grid gap-4 p-5 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)]">
                 <div>
-                    <p class="font-medium text-slate-900">{{ detalle.template_item.nombre }}</p>
-                    <p class="text-sm text-slate-500">{{ detalle.template_item.get_tipo_evaluacion_display }}</p>
+                    <p class="font-bold text-slate-950">{{ detalle.template_item.nombre }}</p>
+                    <p class="mt-1 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">{{ detalle.template_item.get_tipo_evaluacion_display }}</p>
+                    {% if detalle.template_item.descripcion %}<p class="mt-2 text-sm text-slate-500">{{ detalle.template_item.descripcion }}</p>{% endif %}
                 </div>
                 <div>
+                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Evaluación</label>
                     {% if detalle.template_item.tipo_evaluacion == "NUMERICA" %}
-                    <input name="detalle_{{ detalle.pk }}_nota_numerica" type="number" step="0.01" value="{{ detalle.nota_numerica|default_if_none:'' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <input name="detalle_{{ detalle.pk }}_nota_numerica" type="number" step="0.01" value="{{ detalle.nota_numerica|default_if_none:'' }}" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
                     {% elif detalle.template_item.tipo_evaluacion == "CONCEPTO" and examen.cinturon_destino.tipo_rango == "GUP" %}
-                    <select name="detalle_{{ detalle.pk }}_concepto" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"><option value="">Sin evaluar</option>{% for concepto in conceptos_gup_validos %}<option value="{{ concepto }}" {% if detalle.concepto == concepto %}selected{% endif %}>{{ concepto }}</option>{% endfor %}</select>
+                    <select name="detalle_{{ detalle.pk }}_concepto" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"><option value="">Sin evaluar</option>{% for concepto in conceptos_gup_validos %}<option value="{{ concepto }}" {% if detalle.concepto == concepto %}selected{% endif %}>{{ concepto }}</option>{% endfor %}</select>
                     {% elif detalle.template_item.tipo_evaluacion == "CONCEPTO" %}
-                    <input name="detalle_{{ detalle.pk }}_concepto" value="{{ detalle.concepto|default_if_none:'' }}" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <input name="detalle_{{ detalle.pk }}_concepto" value="{{ detalle.concepto|default_if_none:'' }}" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
                     {% elif detalle.template_item.tipo_evaluacion == "TEXTO" %}
-                    <textarea name="detalle_{{ detalle.pk }}_valor_texto" rows="2" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">{{ detalle.valor_texto|default_if_none:'' }}</textarea>
+                    <textarea name="detalle_{{ detalle.pk }}_valor_texto" rows="2" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">{{ detalle.valor_texto|default_if_none:'' }}</textarea>
                     {% elif detalle.template_item.tipo_evaluacion == "CHECK" %}
-                    <select name="detalle_{{ detalle.pk }}_aprobado" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
+                    <select name="detalle_{{ detalle.pk }}_aprobado" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
                         <option value="">Sin evaluar</option>
                         <option value="true" {% if detalle.aprobado is True %}selected{% endif %}>Aprobado</option>
                         <option value="false" {% if detalle.aprobado is False %}selected{% endif %}>No aprobado</option>
                     </select>
                     {% endif %}
                 </div>
-                <div><input name="detalle_{{ detalle.pk }}_observaciones" value="{{ detalle.observaciones|default_if_none:'' }}" placeholder="Observaciones" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"></div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">Observaciones</label>
+                    <input name="detalle_{{ detalle.pk }}_observaciones" value="{{ detalle.observaciones|default_if_none:'' }}" placeholder="Observaciones" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm shadow-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                </div>
             </div>
             {% endfor %}
         </div>
     </section>
     {% endfor %}
-    <div class="flex gap-2">
-        <button class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800">Guardar</button>
-        <a href="{% url 'alumnos:examen_detail' alumno.pk examen.pk %}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Volver al examen</a>
-        <a href="{% url 'alumnos:alumno_detail' alumno.pk %}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Volver a la ficha</a>
+
+    <div class="sticky bottom-4 z-10 flex flex-col-reverse gap-3 rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur sm:flex-row sm:justify-end">
+        <a href="{% url 'alumnos:alumno_detail' alumno.pk %}" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-arrow-left"></i>Ficha</a>
+        <a href="{% url 'alumnos:examen_detail' alumno.pk examen.pk %}" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-eye"></i>Ver examen</a>
+        <button class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800"><i class="fa-solid fa-floppy-disk"></i>Guardar evaluaciones</button>
     </div>
 </form>
 {% endblock %}

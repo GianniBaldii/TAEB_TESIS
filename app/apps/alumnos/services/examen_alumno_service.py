@@ -30,6 +30,10 @@ def validar_puede_crear_examen_actual(alumno, cinturon_destino):
             "El alumno ya tiene un examen pendiente. Primero debe resolverlo, "
             "desaprobarlo o anularlo."
         )
+    validar_cinturon_no_aprobado(alumno, cinturon_destino)
+
+
+def validar_cinturon_no_aprobado(alumno, cinturon_destino):
     if Examen.objects.filter(
         alumno=alumno,
         cinturon_destino=cinturon_destino,
@@ -99,6 +103,7 @@ def crear_examen_para_alumno(
         if not cinturon_destino:
             raise AlumnosError("Seleccione un cinturón destino para el examen histórico.")
         validar_cinturon_destino_rendible(cinturon_destino)
+        validar_cinturon_no_aprobado(alumno, cinturon_destino)
         cinturon_origen = alumno_service.obtener_cinturon_anterior(cinturon_destino)
         if not cinturon_origen:
             raise AlumnosError(

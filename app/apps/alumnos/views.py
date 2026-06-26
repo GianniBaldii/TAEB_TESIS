@@ -23,7 +23,12 @@ from .models import (
     ExamenTemplateItem,
     ExamenTemplateSeccion,
 )
-from .services import alumno_service, examen_alumno_service, examen_template_service
+from .services import (
+    alumno_service,
+    examen_alumno_service,
+    examen_template_service,
+    trayectoria_taekwondista_service,
+)
 from .services.excepciones import AlumnosError
 
 
@@ -136,6 +141,9 @@ def alumno_detail(request, pk):
         {
             "alumno": alumno,
             "progreso": alumno_service.obtener_progreso_alumno(alumno),
+            "analisis_trayectoria": trayectoria_taekwondista_service.obtener_analisis_trayectoria(
+                alumno
+            ),
             "examenes": examenes,
             "historial": historial,
         },

@@ -1,0 +1,223 @@
+Project TAEB_TESIS {
+  database_type: "MySQL"
+  Note: "Diagrama DBML de las tablas principales del proyecto. Incluye tablas propias y referencia a auth_user de Django."
+}
+
+Table auth_user {
+  id int [pk, increment]
+  username varchar(150) [unique]
+  first_name varchar(150)
+  last_name varchar(150)
+  email varchar(254)
+  password varchar(128)
+  is_staff bool
+  is_active bool
+  is_superuser bool
+  last_login datetime
+  date_joined datetime
+
+  Note: "Tabla estándar de usuarios de Django."
+}
+
+Table usuarios_docente {
+  id bigint [pk, increment]
+  usuario_id int [not null, unique]
+  dni varchar(20) [not null, unique]
+  telefono varchar(30)
+  fecha_nacimiento date
+  activo bool [not null, default: true]
+  fecha_creacion datetime [not null]
+  fecha_modificacion datetime [not null]
+}
+
+Table escuelas_escuela {
+  id bigint [pk, increment]
+  nombre varchar(150) [not null]
+  nombre_comercial varchar(150)
+  razon_social varchar(150)
+  cuit varchar(20)
+  email varchar(254)
+  telefono varchar(30)
+  direccion varchar(255)
+  ciudad varchar(100)
+  provincia varchar(100)
+  activo bool [not null, default: true]
+  fecha_creacion datetime [not null]
+  fecha_modificacion datetime [not null]
+}
+
+Table escuelas_escueladocente {
+  id bigint [pk, increment]
+  escuela_id bigint [not null]
+  docente_id bigint [not null]
+  rol varchar(20) [not null, default: "DOCENTE", note: "ADMINISTRADOR | DOCENTE | COORDINADOR"]
+  activo bool [not null, default: true]
+  fecha_alta date [not null]
+  fecha_baja date
+
+  Indexes {
+    (escuela_id, docente_id) [unique, name: "uq_escuela_docente"]
+  }
+}
+
+Table alumnos_cinturon {
+  id bigint [pk, increment]
+  nombre varchar(100) [not null]
+  color varchar(80) [not null]
+  tipo_rango varchar(3) [not null, note: "GUP | DAN"]
+  numeracion smallint [not null]
+  orden smallint [not null, unique]
+  activo bool [not null, default: true]
+
+  Indexes {
+    (tipo_rango, numeracion) [unique, name: "cinturon_tipo_rango_numeracion_unicos"]
+  }
+}
+
+Table alumnos_alumno {
+  id bigint [pk, increment]
+  nombre varchar(100) [not null]
+  apellido varchar(100) [not null]
+  dni varchar(20) [not null, unique]
+  fecha_nacimiento date
+  fecha_inicio_taekwondo date
+  email varchar(254) [unique]
+  telefono varchar(30)
+  direccion varchar(255)
+  peso_aproximado decimal(5,2)
+  altura_aproximada decimal(4,2)
+  cinturon_actual_id bigint
+  activo bool [not null, default: true]
+  fecha_creacion datetime [not null]
+  fecha_modificacion datetime [not null]
+}
+
+Table alumnos_alumnoescuela {
+  id bigint [pk, increment]
+  alumno_id bigint [not null]
+  escuela_id bigint [not null]
+  activo bool [not null, default: true]
+  fecha_inscripcion date [not null]
+  fecha_baja date
+  observaciones text
+  fecha_creacion datetime [not null]
+  fecha_modificacion datetime [not null]
+
+  Indexes {
+    (alumno_id, escuela_id) [unique, name: "uq_alumno_escuela"]
+  }
+}
+
+Table alumnos_examentemplate {
+  id bigint [pk, increment]
+  cinturon_id bigint [not null]
+  nombre varchar(150) [not null]
+  descripcion text
+  nota_minima_aprobacion decimal(5,2)
+  version smallint [not null, default: 1]
+  template_origen_id bigint
+  vigente_desde date
+  vigente_hasta date
+  activo bool [not null, default: true]
+  fecha_creacion datetime [not null]
+  fecha_modificacion datetime [not null]
+}
+
+Table alumnos_examentemplateseccion {
+  id bigint [pk, increment]
+  examen_template_id bigint [not null]
+  nombre varchar(100) [not null]
+  descripcion text
+  orden smallint [not null, default: 1]
+  obligatorio bool [not null, default: true]
+  activo bool [not null, default: true]
+
+  Indexes {
+    (examen_template_id, nombre) [unique, name: "seccion_template_nombre_unicos"]
+  }
+}
+
+Table alumnos_examentemplateitem {
+  id bigint [pk, increment]
+  seccion_id bigint [not null]
+  nombre varchar(150) [not null]
+  descripcion text
+  tipo_evaluacion varchar(10) [not null, note: "NUMERICA | CONCEPTO | TEXTO | CHECK"]
+  orden smallint [not null, default: 1]
+  puntaje_maximo decimal(5,2)
+  ponderacion decimal(5,2) [not null, default: 1]
+  obligatorio bool [not null, default: true]
+  activo bool [not null, default: true]
+}
+
+Table alumnos_examen {
+  id bigint [pk, increment]
+  alumno_id bigint [not null]
+  examen_template_id bigint [not null]
+  cinturon_origen_id bigint [not null]
+  cinturon_destino_id bigint [not null]
+  fecha_examen date [not null]
+  lugar varchar(150)
+  es_historico bool [not null, default: false]
+  estado varchar(12) [not null, default: "PENDIENTE", note: "PENDIENTE | APROBADO | DESAPROBADO | AUSENTE | ANULADO"]
+  nota_final decimal(5,2)
+  resultado_final varchar(20)
+  observaciones text
+  fecha_creacion datetime [not null]
+  fecha_modificacion datetime [not null]
+}
+
+Table alumnos_examendetalle {
+  id bigint [pk, increment]
+  examen_id bigint [not null]
+  template_item_id bigint [not null]
+  nota_numerica decimal(5,2)
+  concepto varchar(50)
+  valor_texto text
+  aprobado bool
+  observaciones text
+
+  Indexes {
+    (examen_id, template_item_id) [unique, name: "detalle_examen_template_item_unicos"]
+  }
+}
+
+Table alumnos_alumnocinturonhistorial {
+  id bigint [pk, increment]
+  alumno_id bigint [not null]
+  cinturon_id bigint [not null]
+  examen_id bigint [unique]
+  fecha_obtencion date [not null]
+  observaciones text
+  fecha_creacion datetime [not null]
+
+  Indexes {
+    (alumno_id, cinturon_id) [unique, name: "historial_alumno_cinturon_unicos"]
+  }
+}
+
+Ref: usuarios_docente.usuario_id - auth_user.id [delete: restrict]
+
+Ref: escuelas_escueladocente.escuela_id > escuelas_escuela.id [delete: restrict]
+Ref: escuelas_escueladocente.docente_id > usuarios_docente.id [delete: restrict]
+
+Ref: alumnos_alumno.cinturon_actual_id > alumnos_cinturon.id [delete: restrict]
+Ref: alumnos_alumnoescuela.alumno_id > alumnos_alumno.id [delete: restrict]
+Ref: alumnos_alumnoescuela.escuela_id > escuelas_escuela.id [delete: restrict]
+
+Ref: alumnos_examentemplate.cinturon_id > alumnos_cinturon.id [delete: restrict]
+Ref: alumnos_examentemplate.template_origen_id > alumnos_examentemplate.id [delete: restrict]
+Ref: alumnos_examentemplateseccion.examen_template_id > alumnos_examentemplate.id [delete: cascade]
+Ref: alumnos_examentemplateitem.seccion_id > alumnos_examentemplateseccion.id [delete: cascade]
+
+Ref: alumnos_examen.alumno_id > alumnos_alumno.id [delete: restrict]
+Ref: alumnos_examen.examen_template_id > alumnos_examentemplate.id [delete: restrict]
+Ref: alumnos_examen.cinturon_origen_id > alumnos_cinturon.id [delete: restrict]
+Ref: alumnos_examen.cinturon_destino_id > alumnos_cinturon.id [delete: restrict]
+
+Ref: alumnos_examendetalle.examen_id > alumnos_examen.id [delete: cascade]
+Ref: alumnos_examendetalle.template_item_id > alumnos_examentemplateitem.id [delete: restrict]
+
+Ref: alumnos_alumnocinturonhistorial.alumno_id > alumnos_alumno.id [delete: restrict]
+Ref: alumnos_alumnocinturonhistorial.cinturon_id > alumnos_cinturon.id [delete: restrict]
+Ref: alumnos_alumnocinturonhistorial.examen_id - alumnos_examen.id [delete: restrict]
