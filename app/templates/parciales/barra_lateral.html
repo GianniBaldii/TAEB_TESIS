@@ -76,8 +76,14 @@
             Administración
         </p>
         <div class="mt-3">
-            <a href="{% url 'escuelas:escuela_list' %}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"><img src="{% static 'iconos/usuarios.svg' %}" alt="" class="h-5 w-5">Escuelas</a>
-            <a href="{% url 'escuelas:docente_list' %}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"><img src="{% static 'iconos/usuarios.svg' %}" alt="" class="h-5 w-5">Docentes</a>
+            <a href="{% url 'escuelas:escuela_list' %}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium {% if request.resolver_match.app_name == 'escuelas' and 'escuela' in request.resolver_match.url_name %}bg-blue-50 text-blue-700{% else %}text-slate-600 transition hover:bg-slate-100 hover:text-slate-900{% endif %}">
+                <span class="flex h-5 w-5 items-center justify-center"><i class="fa-solid fa-school"></i></span>
+                Escuelas
+            </a>
+            <a href="{% url 'escuelas:docente_list' %}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium {% if request.resolver_match.app_name == 'escuelas' and 'docente' in request.resolver_match.url_name %}bg-blue-50 text-blue-700{% else %}text-slate-600 transition hover:bg-slate-100 hover:text-slate-900{% endif %}">
+                <span class="flex h-5 w-5 items-center justify-center"><i class="fa-solid fa-chalkboard-user"></i></span>
+                Docentes
+            </a>
             <a
                 href="{% url 'admin:index' %}"
                 class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"

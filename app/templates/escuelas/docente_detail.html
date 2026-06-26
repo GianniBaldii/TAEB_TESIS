@@ -1,4 +1,59 @@
 {% extends "layouts/principal.html" %}
+
+{% block title %}Docente | TAEB{% endblock %}
+
 {% block contenido %}
-<section class="space-y-5"><div class="rounded-lg bg-white p-6 shadow"><h1 class="text-2xl font-bold">{{ docente }}</h1><p class="text-slate-500">{{ docente.usuario.username }} · DNI {{ docente.dni }}</p><form class="mt-4" method="post" action="{% if docente.activo %}{% url 'escuelas:docente_desactivar' docente.pk %}{% else %}{% url 'escuelas:docente_activar' docente.pk %}{% endif %}">{% csrf_token %}<button class="rounded border px-3 py-2">{% if docente.activo %}Desactivar{% else %}Reactivar{% endif %}</button></form></div><div class="rounded-lg bg-white p-6 shadow"><div class="mb-4 flex justify-between"><h2 class="font-bold">Escuelas asignadas</h2><a class="text-blue-700" href="{% url 'escuelas:docente_escuela_create' docente.pk %}">Asociar escuela</a></div>{% for relacion in docente.escuelas.all %}<div class="border-t py-3">{{ relacion.escuela }} · {{ relacion.get_rol_display }} · {% if relacion.activo %}Activa{% else %}Inactiva{% endif %}</div>{% empty %}<p>Sin escuelas asociadas.</p>{% endfor %}</div></section>
+<section class="space-y-5">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-100 bg-gradient-to-r from-blue-50 via-white to-slate-50 p-6">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div class="flex items-start gap-4">
+                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-700 text-xl text-white shadow-sm">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-blue-700">Docente</p>
+                        <h1 class="text-2xl font-black text-slate-950">{{ docente }}</h1>
+                        <div class="mt-3 flex flex-wrap items-center gap-2">
+                            <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-700"><i class="fa-solid fa-at"></i>{{ docente.usuario.username }}</span>
+                            <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-700"><i class="fa-solid fa-id-card"></i>DNI {{ docente.dni }}</span>
+                            <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold {% if docente.activo %}border-emerald-200 bg-emerald-50 text-emerald-700{% else %}border-slate-200 bg-slate-100 text-slate-600{% endif %}"><i class="fa-solid {% if docente.activo %}fa-circle-check{% else %}fa-circle-pause{% endif %}"></i>{% if docente.activo %}Activo{% else %}Inactivo{% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <a href="{% url 'escuelas:docente_list' %}" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-arrow-left"></i>Volver</a>
+                    <form method="post" action="{% if docente.activo %}{% url 'escuelas:docente_desactivar' docente.pk %}{% else %}{% url 'escuelas:docente_activar' docente.pk %}{% endif %}">{% csrf_token %}<button class="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold {% if docente.activo %}border-red-200 bg-red-50 text-red-700 hover:bg-red-100{% else %}border-green-200 bg-green-50 text-green-700 hover:bg-green-100{% endif %}"><i class="fa-solid {% if docente.activo %}fa-user-slash{% else %}fa-user-check{% endif %}"></i>{% if docente.activo %}Desactivar{% else %}Reactivar{% endif %}</button></form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-3">
+                <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700"><i class="fa-solid fa-school"></i></span>
+                <div><h2 class="text-lg font-black text-slate-950">Escuelas asignadas</h2><p class="text-sm text-slate-500">Ámbitos donde el docente puede operar.</p></div>
+            </div>
+            <a class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800" href="{% url 'escuelas:docente_escuela_create' docente.pk %}"><i class="fa-solid fa-plus"></i>Asociar escuela</a>
+        </div>
+        <div class="divide-y divide-slate-100">
+            {% for relacion in docente.escuelas.all %}
+            <div class="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div><p class="font-bold text-slate-950">{{ relacion.escuela }}</p><p class="text-sm text-slate-500">{{ relacion.get_rol_display }} · {% if relacion.fecha_baja %}Baja {{ relacion.fecha_baja|date:"d/m/Y" }}{% else %}Desde {{ relacion.fecha_alta|date:"d/m/Y" }}{% endif %}</p></div>
+                <div class="flex items-center gap-2">
+                    <span class="rounded-full border px-3 py-1 text-xs font-bold {% if relacion.activo %}border-emerald-200 bg-emerald-50 text-emerald-700{% else %}border-slate-200 bg-slate-100 text-slate-600{% endif %}">{% if relacion.activo %}Activa{% else %}Inactiva{% endif %}</span>
+                    {% if relacion.activo %}
+                    <form method="post" action="{% url 'escuelas:docente_escuela_desactivar' relacion.pk %}">{% csrf_token %}<button class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-700 hover:bg-red-100" title="Desactivar vínculo"><i class="fa-solid fa-ban"></i></button></form>
+                    {% else %}
+                    <form method="post" action="{% url 'escuelas:docente_escuela_activar' relacion.pk %}">{% csrf_token %}<button class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-green-200 bg-green-50 text-green-700 hover:bg-green-100" title="Reactivar vínculo"><i class="fa-solid fa-check"></i></button></form>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-slate-500">Sin escuelas asociadas.</div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 {% endblock %}

@@ -1,14 +1,75 @@
 {% extends "layouts/principal.html" %}
+
 {% block title %}Nuevo docente | TAEB{% endblock %}
+
 {% block contenido %}
 <section class="mx-auto max-w-4xl space-y-5" x-data="{ mostrarContrasena: false, enviando: false }">
-  <div><p class="text-sm font-semibold text-blue-600">Administración / Docentes</p><h1 class="mt-1 text-3xl font-bold tracking-tight text-slate-900">Crear docente</h1><p class="mt-2 text-slate-500">Al guardar se creará el usuario de acceso, su perfil y la primera escuela donde podrá operar.</p></div>
-  <form method="post" class="space-y-5" @submit="enviando = true">{% csrf_token %}
-    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><div class="flex items-start gap-3"><span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-sm font-bold text-blue-700">1</span><div><h2 class="text-lg font-bold text-slate-900">Datos de acceso</h2><p class="text-sm text-slate-500">Estas credenciales permitirán que el docente ingrese al sistema.</p></div></div><div class="mt-5 grid gap-4 md:grid-cols-2">{% for field in form %}{% if field.name == "first_name" or field.name == "last_name" or field.name == "username" or field.name == "email" %}<div><label for="{{ field.id_for_label }}" class="mb-1 block text-sm font-medium text-slate-700">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}</div>{% endif %}{% endfor %}</div><div class="mt-4 grid gap-4 md:grid-cols-2">{% for field in form %}{% if field.name == "password1" or field.name == "password2" %}<div><label for="{{ field.id_for_label }}" class="mb-1 block text-sm font-medium text-slate-700">{{ field.label }}</label><div class="relative">{{ field }}{% if field.name == "password1" %}<button type="button" @click="mostrarContrasena = !mostrarContrasena" class="absolute inset-y-0 right-3 text-xs font-semibold text-blue-700" x-text="mostrarContrasena ? 'Ocultar' : 'Mostrar'"></button>{% endif %}</div>{% for error in field.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}</div>{% endif %}{% endfor %}</div></section>
-    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><div class="flex items-start gap-3"><span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-100 text-sm font-bold text-violet-700">2</span><div><h2 class="text-lg font-bold">Perfil del docente</h2><p class="text-sm text-slate-500">Información personal y de contacto.</p></div></div><div class="mt-5 grid gap-4 md:grid-cols-2">{% for field in form %}{% if field.name == "dni" or field.name == "telefono" or field.name == "fecha_nacimiento" %}<div><label for="{{ field.id_for_label }}" class="mb-1 block text-sm font-medium text-slate-700">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}</div>{% endif %}{% endfor %}</div></section>
-    <section class="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-6 shadow-sm"><div class="flex items-start gap-3"><span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-sm font-bold text-emerald-700">3</span><div><h2 class="text-lg font-bold">Asignación inicial</h2><p class="text-sm text-slate-500">La escuela seleccionada determinará los alumnos que este docente podrá gestionar.</p></div></div><div class="mt-5 grid gap-4 md:grid-cols-2">{% for field in form %}{% if field.name == "escuela" or field.name == "rol" %}<div><label for="{{ field.id_for_label }}" class="mb-1 block text-sm font-medium text-slate-700">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}</div>{% endif %}{% endfor %}</div></section>
-    {% for error in form.non_field_errors %}<p class="rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ error }}</p>{% endfor %}
-    <div class="flex justify-end gap-3"><a href="{% url 'escuelas:docente_list' %}" class="rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-700">Cancelar</a><button :disabled="enviando" class="rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm disabled:opacity-60"><span x-text="enviando ? 'Creando…' : 'Crear docente'"></span></button></div>
-  </form>
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-100 bg-gradient-to-r from-blue-50 via-white to-slate-50 p-6">
+            <div class="flex items-center gap-4">
+                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-700 text-xl text-white shadow-sm">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold uppercase tracking-wide text-blue-700">Administración / Docentes</p>
+                    <h1 class="text-2xl font-black text-slate-950">Crear docente</h1>
+                    <p class="mt-1 text-sm text-slate-500">Al guardar se creará el usuario de acceso, su perfil y la primera escuela donde podrá operar.</p>
+                </div>
+            </div>
+        </div>
+
+        <form method="post" class="space-y-6 p-6" @submit="enviando = true">
+            {% csrf_token %}
+
+            <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="mb-5 flex items-start gap-3">
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-blue-700"><i class="fa-solid fa-key"></i></span>
+                    <div><h2 class="text-lg font-black text-slate-950">Datos de acceso</h2><p class="text-sm text-slate-500">Credenciales para que el docente ingrese al sistema.</p></div>
+                </div>
+                <div class="grid gap-4 md:grid-cols-2">
+                    {% include "alumnos/partials/form_field_icon.html" with field=form.first_name icon="fa-user" %}
+                    {% include "alumnos/partials/form_field_icon.html" with field=form.last_name icon="fa-user-tag" %}
+                    {% include "alumnos/partials/form_field_icon.html" with field=form.username icon="fa-at" %}
+                    {% include "alumnos/partials/form_field_icon.html" with field=form.email icon="fa-envelope" %}
+                    <div>
+                        <label for="{{ form.password1.id_for_label }}" class="mb-1.5 flex items-center gap-2 text-sm font-semibold text-slate-700"><i class="fa-solid fa-lock text-slate-400"></i>{{ form.password1.label }} <span class="text-red-500">*</span></label>
+                        <div class="relative">{{ form.password1 }}<button type="button" @click="mostrarContrasena = !mostrarContrasena" class="absolute inset-y-0 right-3 text-xs font-semibold text-blue-700" x-text="mostrarContrasena ? 'Ocultar' : 'Mostrar'"></button></div>
+                        {% for error in form.password1.errors %}<p class="mt-1 text-sm font-semibold text-red-600">{{ error }}</p>{% endfor %}
+                    </div>
+                    {% include "alumnos/partials/form_field_icon.html" with field=form.password2 icon="fa-lock" %}
+                </div>
+            </section>
+
+            <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="mb-5 flex items-start gap-3">
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-100 text-violet-700"><i class="fa-solid fa-id-card"></i></span>
+                    <div><h2 class="text-lg font-black text-slate-950">Perfil del docente</h2><p class="text-sm text-slate-500">Información personal y de contacto.</p></div>
+                </div>
+                <div class="grid gap-4 md:grid-cols-2">
+                    {% include "alumnos/partials/form_field_icon.html" with field=form.dni icon="fa-id-card" %}
+                    {% include "alumnos/partials/form_field_icon.html" with field=form.telefono icon="fa-phone" %}
+                    {% include "alumnos/partials/form_field_icon.html" with field=form.fecha_nacimiento icon="fa-cake-candles" %}
+                </div>
+            </section>
+
+            <section class="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-5 shadow-sm">
+                <div class="mb-5 flex items-start gap-3">
+                    <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700"><i class="fa-solid fa-school"></i></span>
+                    <div><h2 class="text-lg font-black text-slate-950">Asignación inicial</h2><p class="text-sm text-slate-500">La escuela seleccionada determinará los alumnos que este docente podrá gestionar.</p></div>
+                </div>
+                <div class="grid gap-4 md:grid-cols-2">
+                    {% include "alumnos/partials/form_field_icon.html" with field=form.escuela icon="fa-school" %}
+                    {% include "alumnos/partials/form_field_icon.html" with field=form.rol icon="fa-user-shield" %}
+                </div>
+            </section>
+
+            {% for error in form.non_field_errors %}<p class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700">{{ error }}</p>{% endfor %}
+
+            <div class="flex flex-col-reverse gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:justify-end">
+                <a href="{% url 'escuelas:docente_list' %}" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-arrow-left"></i>Cancelar</a>
+                <button :disabled="enviando" class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm disabled:opacity-60"><i class="fa-solid fa-user-plus"></i><span x-text="enviando ? 'Creando…' : 'Crear docente'"></span></button>
+            </div>
+        </form>
+    </div>
 </section>
 {% endblock %}
