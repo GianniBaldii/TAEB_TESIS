@@ -1,5 +1,74 @@
 # TAEB
 
+## Mobile MVP: Django API + Ionic
+
+La primera integracion mobile agrega:
+
+- credenciales mobile para alumnos usando `auth_user`;
+- login por DNI + contrasena;
+- API REST versionada en `/api/v1/mobile/`;
+- JWT con refresh token y blacklist;
+- frontend Ionic/Angular en `mobile/`;
+- servicio Docker `mobile` en el puerto `8100`.
+
+### Levantar con Docker
+
+```powershell
+docker compose up --build
+```
+
+Servicios:
+
+- `db`: MySQL.
+- `backend`: Django web + API REST.
+- `mobile`: Ionic development server.
+
+Migraciones:
+
+```powershell
+docker compose exec backend python app/manage.py migrate
+```
+
+Tests backend:
+
+```powershell
+docker compose exec backend python app/manage.py test
+```
+
+### Flujo temporal de credenciales
+
+Desde la ficha del alumno, en la card `Acceso mobile`, un docente con permiso o un superadmin puede:
+
+- generar credenciales mobile;
+- resetear contrasena;
+- revocar sesiones;
+- bloquear acceso;
+- reactivar acceso.
+
+El usuario de acceso es el DNI normalizado del alumno. La contrasena la define manualmente el docente o superadmin y debe comunicarse por fuera del sistema en esta etapa.
+
+Por seguridad:
+
+- la contrasena no se guarda en texto plano;
+- no se muestra luego de guardar;
+- se persiste solo mediante `user.set_password(...)`;
+- el reset y el bloqueo revocan refresh tokens activos.
+
+En una etapa futura este flujo sera reemplazado por activacion y recuperacion por email.
+
+### Probar login mobile
+
+1. Crear o elegir un alumno activo con escuela activa.
+2. Entrar a su ficha en Django.
+3. Generar credenciales mobile.
+4. Abrir Ionic:
+
+```text
+http://localhost:8100
+```
+
+5. Iniciar sesion con DNI y contrasena.
+
 Sistema web de gestión de alumnos de Taekwondo desarrollado con Django,
 Django Templates, Tailwind CSS y MySQL.
 

@@ -1,0 +1,7 @@
+{
+  "name": "TAEB Mobile",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

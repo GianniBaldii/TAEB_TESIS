@@ -23,7 +23,7 @@ services:
       retries: 20
       start_period: 20s
 
-  web:
+  backend:
     build:
       context: .
       dockerfile: docker/django/Dockerfile
@@ -41,5 +41,21 @@ services:
       db:
         condition: service_healthy
 
+  mobile:
+    build:
+      context: .
+      dockerfile: mobile/Dockerfile
+    restart: unless-stopped
+    environment:
+      IONIC_API_BASE_URL: ${IONIC_API_BASE_URL:-http://localhost:8000/api/v1/mobile}
+    volumes:
+      - ./mobile:/workspace/mobile
+      - mobile_node_modules:/workspace/mobile/node_modules
+    ports:
+      - "${IONIC_PORT:-8100}:8100"
+    depends_on:
+      - backend
+
 volumes:
   mysql_data:
+  mobile_node_modules:
