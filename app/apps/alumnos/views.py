@@ -8,10 +8,13 @@ from apps.escuelas.models import Escuela
 
 from .forms import (
     AlumnoForm,
+    BloquearAccesoMobileAlumnoForm,
     CrearExamenForm,
     ExamenTemplateForm,
     ExamenTemplateItemForm,
     ExamenTemplateSeccionForm,
+    GenerarCredencialesAlumnoForm,
+    ResetearPasswordAlumnoForm,
 )
 from .models import (
     Alumno,
@@ -28,6 +31,7 @@ from .services import (
     examen_alumno_service,
     examen_template_service,
     trayectoria_taekwondista_service,
+    alumno_credencial_service,
 )
 from .services.excepciones import AlumnosError
 
@@ -135,11 +139,16 @@ def alumno_detail(request, pk):
     alumno, _ = _alumno_accesible(request, pk)
     examenes = _examen_queryset(alumno).exclude(estado=Examen.Estado.ANULADO)
     historial = alumno.historial_cinturones.select_related("cinturon", "examen")
+    credencial_mobile = getattr(alumno, "credencial_mobile", None)
     return render(
         request,
         "alumnos/alumno_detail.html",
         {
             "alumno": alumno,
+            "credencial_mobile": credencial_mobile,
+            "generar_credenciales_form": GenerarCredencialesAlumnoForm(),
+            "resetear_password_form": ResetearPasswordAlumnoForm(),
+            "bloquear_acceso_form": BloquearAccesoMobileAlumnoForm(),
             "progreso": alumno_service.obtener_progreso_alumno(alumno),
             "analisis_trayectoria": trayectoria_taekwondista_service.obtener_analisis_trayectoria(
                 alumno
@@ -148,6 +157,112 @@ def alumno_detail(request, pk):
             "historial": historial,
         },
     )
+
+
+@login_required
+def alumno_credencial_generar(request, alumno_id):
+    alumno, _ = _alumno_accesible(request, alumno_id)
+    if request.method == "POST":
+        form = GenerarCredencialesAlumnoForm(request.POST)
+        if form.is_valid():
+            try:
+                alumno_credencial_service.crear_credencial_mobile_para_alumno(
+                    alumno=alumno,
+                    password=form.cleaned_data["password"],
+                    password_confirmacion=form.cleaned_data["password_confirmacion"],
+                    actor=request.user,
+                )
+            except AlumnosError as exc:
+                _mensaje_error_validacion(request, exc)
+            else:
+                messages.success(request, "Credenciales mobile generadas correctamente.")
+    return redirect("alumnos:alumno_detail", pk=alumno.pk)
+
+
+@login_required
+def alumno_credencial_resetear_password(request, alumno_id):
+    alumno, _ = _alumno_accesible(request, alumno_id)
+    credencial = get_object_or_404(alumno_credencial_queryset(alumno), alumno=alumno)
+    if request.method == "POST":
+        form = ResetearPasswordAlumnoForm(request.POST)
+        if form.is_valid():
+            try:
+                alumno_credencial_service.resetear_password_credencial_mobile(
+                    credencial=credencial,
+                    password=form.cleaned_data["password"],
+                    password_confirmacion=form.cleaned_data["password_confirmacion"],
+                    actor=request.user,
+                )
+            except AlumnosError as exc:
+                _mensaje_error_validacion(request, exc)
+            else:
+                messages.success(request, "Contrasena mobile actualizada correctamente.")
+    return redirect("alumnos:alumno_detail", pk=alumno.pk)
+
+
+def alumno_credencial_queryset(alumno):
+    from .models import AlumnoCredencial
+
+    return AlumnoCredencial.objects.select_related("alumno", "usuario").filter(
+        alumno=alumno
+    )
+
+
+@login_required
+def alumno_credencial_revocar_sesiones(request, alumno_id):
+    alumno, _ = _alumno_accesible(request, alumno_id)
+    credencial = get_object_or_404(alumno_credencial_queryset(alumno), alumno=alumno)
+    if request.method == "POST":
+        try:
+            alumno_credencial_service.validar_acceso_gestion_credencial(
+                actor=request.user,
+                alumno=alumno,
+            )
+            alumno_credencial_service.revocar_sesiones_mobile_alumno(
+                usuario=credencial.usuario
+            )
+        except AlumnosError as exc:
+            _mensaje_error_validacion(request, exc)
+        else:
+            messages.success(request, "Sesiones mobile revocadas correctamente.")
+    return redirect("alumnos:alumno_detail", pk=alumno.pk)
+
+
+@login_required
+def alumno_credencial_bloquear(request, alumno_id):
+    alumno, _ = _alumno_accesible(request, alumno_id)
+    credencial = get_object_or_404(alumno_credencial_queryset(alumno), alumno=alumno)
+    if request.method == "POST":
+        form = BloquearAccesoMobileAlumnoForm(request.POST)
+        if form.is_valid():
+            try:
+                alumno_credencial_service.bloquear_acceso_mobile(
+                    credencial=credencial,
+                    actor=request.user,
+                    motivo=form.cleaned_data["motivo"],
+                )
+            except AlumnosError as exc:
+                _mensaje_error_validacion(request, exc)
+            else:
+                messages.success(request, "Acceso mobile bloqueado correctamente.")
+    return redirect("alumnos:alumno_detail", pk=alumno.pk)
+
+
+@login_required
+def alumno_credencial_reactivar(request, alumno_id):
+    alumno, _ = _alumno_accesible(request, alumno_id)
+    credencial = get_object_or_404(alumno_credencial_queryset(alumno), alumno=alumno)
+    if request.method == "POST":
+        try:
+            alumno_credencial_service.reactivar_acceso_mobile(
+                credencial=credencial,
+                actor=request.user,
+            )
+        except AlumnosError as exc:
+            _mensaje_error_validacion(request, exc)
+        else:
+            messages.success(request, "Acceso mobile reactivado correctamente.")
+    return redirect("alumnos:alumno_detail", pk=alumno.pk)
 
 
 @login_required

@@ -1,4 +1,5 @@
 from .alumno import Alumno
+from .alumno_credencial import AlumnoCredencial
 from .alumno_escuela import AlumnoEscuela
 from .cinturon import Cinturon
 from .examen import Examen, ExamenDetalle
@@ -7,6 +8,7 @@ from .historial import AlumnoCinturonHistorial
 
 __all__ = [
     "Alumno",
+    "AlumnoCredencial",
     "AlumnoEscuela",
     "AlumnoCinturonHistorial",
     "Cinturon",
