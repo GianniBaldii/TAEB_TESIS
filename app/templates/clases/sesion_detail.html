@@ -1,0 +1,51 @@
+{% extends "layouts/principal.html" %}
+
+{% block title %}Sesion de clase | TAEB{% endblock %}
+
+{% block contenido %}
+<section class="space-y-5">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-100 bg-gradient-to-r from-blue-50 via-white to-slate-50 p-6">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-700 text-xl text-white shadow-sm">
+                        <i class="fa-solid {% if sesion.es_clase_extra %}fa-star{% else %}fa-calendar-check{% endif %}"></i>
+                    </div>
+                    <div>
+                        <a href="{% url 'clases:calendario' %}" class="text-sm font-semibold text-blue-700 hover:text-blue-900"><i class="fa-solid fa-arrow-left mr-1"></i>Volver al calendario</a>
+                        <h1 class="mt-1 text-2xl font-black text-slate-950">{{ sesion.clase.nombre }}</h1>
+                        <p class="mt-1 text-sm text-slate-500">{{ sesion.fecha|date:"d/m/Y" }} · {{ sesion.hora_inicio|time:"H:i" }} a {{ sesion.hora_fin|time:"H:i" }}</p>
+                    </div>
+                </div>
+                {% include "clases/partials/sesion_estado_badge.html" with estado=sesion.estado %}
+            </div>
+        </div>
+
+        <div class="grid gap-4 p-5 md:grid-cols-2 lg:grid-cols-4">
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4"><p class="text-xs font-bold uppercase text-slate-500"><i class="fa-solid fa-school mr-1"></i>Escuela</p><p class="mt-2 font-bold text-slate-950">{{ sesion.clase.escuela }}</p></article>
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4"><p class="text-xs font-bold uppercase text-slate-500"><i class="fa-solid fa-user-tie mr-1"></i>Docente</p><p class="mt-2 font-bold text-slate-950">{% if sesion.docente_a_cargo %}{{ sesion.docente_a_cargo }}{% elif sesion.clase.docente_responsable %}{{ sesion.clase.docente_responsable }}{% else %}Sin docente{% endif %}</p></article>
+            <article class="rounded-2xl border border-slate-200 bg-slate-50 p-4"><p class="text-xs font-bold uppercase text-slate-500"><i class="fa-solid fa-layer-group mr-1"></i>Tipo</p><p class="mt-2 font-bold text-slate-950">{% if sesion.es_clase_extra %}Extra{% else %}Regular{% endif %}</p></article>
+            <article class="rounded-2xl border border-blue-100 bg-blue-50 p-4"><p class="text-xs font-bold uppercase text-blue-700"><i class="fa-solid fa-list-check mr-1"></i>Asistencia</p><p class="mt-2 font-bold text-slate-950">{{ resumen.presentes }} presentes · {{ resumen.pendientes }} pendientes</p></article>
+        </div>
+
+        {% if sesion.motivo_cancelacion %}
+        <div class="mx-5 mb-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
+            <i class="fa-solid fa-circle-exclamation mr-2"></i>{{ sesion.motivo_cancelacion }}
+        </div>
+        {% endif %}
+
+        <div class="flex flex-wrap gap-2 border-t border-slate-100 p-5">
+            {% if sesion.estado != "CANCELADA" %}
+            <a href="{% url 'clases:asistencia_form' sesion.pk %}" class="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800"><i class="fa-solid fa-clipboard-user"></i>Tomar asistencia</a>
+            {% endif %}
+            {% if sesion.estado == "FINALIZADA" %}
+            <form method="post" action="{% url 'clases:reabrir_asistencia' sesion.pk %}">{% csrf_token %}<button class="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 hover:bg-amber-100"><i class="fa-solid fa-lock-open"></i>Reabrir</button></form>
+            {% endif %}
+            {% if sesion.estado != "FINALIZADA" and sesion.estado != "CANCELADA" %}
+            <a href="{% url 'clases:cancelar_sesion' sesion.pk %}" class="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-100"><i class="fa-solid fa-ban"></i>Cancelar</a>
+            {% endif %}
+            <a href="{% url 'clases:clase_detail' sesion.clase.pk %}" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"><i class="fa-solid fa-dumbbell"></i>Ver clase</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

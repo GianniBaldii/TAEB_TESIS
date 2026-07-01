@@ -1,0 +1,129 @@
+{% extends "layouts/principal.html" %}
+
+{% block title %}Calendario de clases | TAEB{% endblock %}
+
+{% block contenido %}
+<section class="space-y-5">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-100 bg-gradient-to-r from-blue-50 via-white to-slate-50 p-6">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-700 text-xl text-white shadow-sm">
+                        <i class="fa-solid fa-calendar-days"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold uppercase tracking-wide text-blue-700">Clases</p>
+                        <h1 class="text-2xl font-black text-slate-950">Calendario</h1>
+                        <p class="mt-1 text-sm text-slate-500">{{ fecha_desde|date:"d/m/Y" }} a {{ fecha_hasta|date:"d/m/Y" }}</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <a href="?vista={{ vista }}&fecha={{ fecha_anterior|date:'Y-m-d' }}&escuela={{ filtros.escuela }}&clase={{ filtros.clase }}&docente={{ filtros.docente }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"><i class="fa-solid fa-chevron-left"></i>Anterior</a>
+                    <a href="?vista={{ vista }}&fecha={% now 'Y-m-d' %}&escuela={{ filtros.escuela }}&clase={{ filtros.clase }}&docente={{ filtros.docente }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"><i class="fa-solid fa-location-crosshairs"></i>Hoy</a>
+                    <a href="?vista={{ vista }}&fecha={{ fecha_siguiente|date:'Y-m-d' }}&escuela={{ filtros.escuela }}&clase={{ filtros.clase }}&docente={{ filtros.docente }}" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">Siguiente<i class="fa-solid fa-chevron-right"></i></a>
+                    <a href="{% url 'clases:clase_list' %}" class="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800"><i class="fa-solid fa-list-check"></i>Gestion</a>
+                </div>
+            </div>
+        </div>
+
+        <form method="get" class="grid gap-3 p-5 md:grid-cols-2 xl:grid-cols-5">
+            <label class="relative">
+                <span class="sr-only">Fecha</span>
+                <i class="fa-solid fa-calendar-day pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="date" name="fecha" value="{{ fecha_desde|date:'Y-m-d' }}" class="block w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+            </label>
+            <label class="relative">
+                <span class="sr-only">Vista</span>
+                <i class="fa-solid fa-table-cells-large pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <select name="vista" class="block w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                    <option value="semana" {% if vista == "semana" %}selected{% endif %}>Semana</option>
+                    <option value="dia" {% if vista == "dia" %}selected{% endif %}>Dia</option>
+                </select>
+            </label>
+            {% if request.user.is_superuser %}
+            <label class="relative">
+                <span class="sr-only">Escuela</span>
+                <i class="fa-solid fa-school pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <select name="escuela" class="block w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                    <option value="">Todas las escuelas</option>
+                    {% for escuela in escuelas %}
+                    <option value="{{ escuela.pk }}" {% if filtros.escuela == escuela.pk|stringformat:"s" %}selected{% endif %}>{{ escuela }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            {% endif %}
+            <label class="relative">
+                <span class="sr-only">Clase</span>
+                <i class="fa-solid fa-dumbbell pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <select name="clase" class="block w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                    <option value="">Todas las clases</option>
+                    {% for clase in clases %}
+                    <option value="{{ clase.pk }}" {% if filtros.clase == clase.pk|stringformat:"s" %}selected{% endif %}>{{ clase.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label class="relative">
+                <span class="sr-only">Docente</span>
+                <i class="fa-solid fa-user-tie pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <select name="docente" class="block w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20">
+                    <option value="">Todos los docentes</option>
+                    {% for docente in docentes %}
+                    <option value="{{ docente.pk }}" {% if filtros.docente == docente.pk|stringformat:"s" %}selected{% endif %}>{{ docente }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <div class="flex gap-2 xl:col-start-5">
+                <button class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                    <i class="fa-solid fa-filter"></i>
+                    Aplicar
+                </button>
+                <a href="{% url 'clases:calendario' %}" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-500 shadow-sm hover:bg-slate-50" title="Limpiar filtros">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="grid gap-3">
+        {% for evento in eventos %}
+        {% if evento.tipo == "sesion" %}
+        {% with sesion=evento.sesion %}
+        <a href="{% url 'clases:sesion_detail' sesion.pk %}" class="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-blue-300 hover:shadow-md">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex gap-3">
+                    <span class="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 group-hover:bg-blue-100 group-hover:text-blue-700">
+                        <i class="fa-solid {% if sesion.es_clase_extra %}fa-star{% else %}fa-calendar-check{% endif %}"></i>
+                    </span>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-500">{{ sesion.fecha|date:"d/m/Y" }} · {{ sesion.hora_inicio|time:"H:i" }} a {{ sesion.hora_fin|time:"H:i" }}</p>
+                        <h2 class="mt-1 text-lg font-black text-slate-950">{{ sesion.clase.nombre }}</h2>
+                        <p class="text-sm text-slate-500"><i class="fa-solid fa-user-tie mr-1 text-slate-300"></i>{% if sesion.docente_a_cargo %}{{ sesion.docente_a_cargo }}{% elif sesion.clase.docente_responsable %}{{ sesion.clase.docente_responsable }}{% else %}Sin docente{% endif %}</p>
+                    </div>
+                </div>
+                {% include "clases/partials/sesion_estado_badge.html" with estado=sesion.estado %}
+            </div>
+        </a>
+        {% endwith %}
+        {% else %}
+        <a href="{% url 'clases:abrir_ocurrencia' evento.horario.pk %}?fecha={{ evento.fecha|date:'Y-m-d' }}" class="group rounded-2xl border border-dashed border-blue-200 bg-blue-50/70 p-4 shadow-sm transition hover:border-blue-400 hover:bg-blue-50">
+            <div class="flex gap-3">
+                <span class="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-100 text-blue-700"><i class="fa-solid fa-calendar-plus"></i></span>
+                <div>
+                    <p class="text-sm font-bold text-blue-700">{{ evento.fecha|date:"d/m/Y" }} · {{ evento.hora_inicio|time:"H:i" }} a {{ evento.hora_fin|time:"H:i" }}</p>
+                    <h2 class="mt-1 text-lg font-black text-slate-950">{{ evento.clase.nombre }}</h2>
+                    <p class="text-sm text-slate-600"><i class="fa-solid fa-user-tie mr-1 text-blue-300"></i>{{ evento.clase.docente_responsable|default:"Sin docente" }}</p>
+                </div>
+            </div>
+        </a>
+        {% endif %}
+        {% empty %}
+        <div class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
+            <i class="fa-solid fa-calendar-xmark text-4xl text-slate-300"></i>
+            <p class="mt-4 font-bold text-slate-900">No hay clases en este rango</p>
+            <p class="mt-1 text-sm text-slate-500">Ajustá los filtros o cargá horarios recurrentes en una clase.</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
