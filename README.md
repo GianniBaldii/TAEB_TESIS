@@ -1,5 +1,74 @@
 # TAEB
 
+## Mobile MVP: Django API + Ionic
+
+La primera integracion mobile agrega:
+
+- credenciales mobile para alumnos usando `auth_user`;
+- login por DNI + contrasena;
+- API REST versionada en `/api/v1/mobile/`;
+- JWT con refresh token y blacklist;
+- frontend Ionic/Angular en `mobile/`;
+- servicio Docker `mobile` en el puerto `8100`.
+
+### Levantar con Docker
+
+```powershell
+docker compose up --build
+```
+
+Servicios:
+
+- `db`: MySQL.
+- `backend`: Django web + API REST.
+- `mobile`: Ionic development server.
+
+Migraciones:
+
+```powershell
+docker compose exec backend python app/manage.py migrate
+```
+
+Tests backend:
+
+```powershell
+docker compose exec backend python app/manage.py test
+```
+
+### Flujo temporal de credenciales
+
+Desde la ficha del alumno, en la card `Acceso mobile`, un docente con permiso o un superadmin puede:
+
+- generar credenciales mobile;
+- resetear contrasena;
+- revocar sesiones;
+- bloquear acceso;
+- reactivar acceso.
+
+El usuario de acceso es el DNI normalizado del alumno. La contrasena la define manualmente el docente o superadmin y debe comunicarse por fuera del sistema en esta etapa.
+
+Por seguridad:
+
+- la contrasena no se guarda en texto plano;
+- no se muestra luego de guardar;
+- se persiste solo mediante `user.set_password(...)`;
+- el reset y el bloqueo revocan refresh tokens activos.
+
+En una etapa futura este flujo sera reemplazado por activacion y recuperacion por email.
+
+### Probar login mobile
+
+1. Crear o elegir un alumno activo con escuela activa.
+2. Entrar a su ficha en Django.
+3. Generar credenciales mobile.
+4. Abrir Ionic:
+
+```text
+http://localhost:8100
+```
+
+5. Iniciar sesion con DNI y contrasena.
+
 Sistema web de gestión de alumnos de Taekwondo desarrollado con Django,
 Django Templates, Tailwind CSS y MySQL.
 
@@ -154,7 +223,7 @@ Los servicios esperados son:
 Con los contenedores levantados:
 
 ```powershell
-docker compose exec web python app/manage.py migrate
+docker compose exec backend python app/manage.py migrate
 ```
 
 Este comando crea las tablas de Django, incluida `auth_user`.
@@ -164,7 +233,7 @@ Este comando crea las tablas de Django, incluida `auth_user`.
 Crear un superusuario:
 
 ```powershell
-docker compose exec web python app/manage.py createsuperuser
+docker compose exec backend python app/manage.py createsuperuser
 ```
 
 Django solicitará:
@@ -210,7 +279,7 @@ docker compose logs -f
 Ver únicamente los logs de Django:
 
 ```powershell
-docker compose logs -f web
+docker compose logs -f backend
 ```
 
 Los datos de MySQL se conservan en el volumen `mysql_data` al ejecutar
@@ -412,38 +481,38 @@ docker compose up -d db
 Reconstruir Django después de cambiar dependencias o el Dockerfile:
 
 ```powershell
-docker compose up -d --build web
+docker compose up -d --build backend
 ```
 
 Ejecutar migraciones:
 
 ```powershell
-docker compose exec web python app/manage.py migrate
+docker compose exec backend python app/manage.py migrate
 ```
 
 Crear un superusuario:
 
 ```powershell
-docker compose exec web python app/manage.py createsuperuser
+docker compose exec backend python app/manage.py createsuperuser
 ```
 
 Comprobar la configuración de Django:
 
 ```powershell
-docker compose exec web python app/manage.py check
+docker compose exec backend python app/manage.py check
 ```
 
 Ejecutar tests:
 
 ```powershell
-docker compose exec web python app/manage.py test apps `
+docker compose exec backend python app/manage.py test apps `
   --settings=config.settings.test
 ```
 
 Abrir una consola de Django:
 
 ```powershell
-docker compose exec web python app/manage.py shell
+docker compose exec backend python app/manage.py shell
 ```
 
 ## Versionado del proyecto
@@ -490,6 +559,101 @@ Para revisar archivos modificados y la rama activa:
 ```powershell
 git status
 git branch --show-current
+```
+
+### Entorno virtual local en Windows
+
+Cada vez que se abre una terminal nueva, el entorno virtual debe activarse de
+nuevo. Desde la raíz del proyecto:
+
+```powershell
+cd C:\proyectos\TAEB_TESIS
+.\.venv\Scripts\Activate.ps1
+```
+
+La terminal debe mostrar el prefijo:
+
+```text
+(.venv) PS C:\proyectos\TAEB_TESIS>
+```
+
+Si PowerShell bloquea la activación:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\.venv\Scripts\Activate.ps1
+```
+
+Comandos útiles con el entorno virtual activo:
+
+```powershell
+python --version
+python -m pip install -r requirements.txt
+python app\manage.py check --settings=config.settings.test
+```
+
+También se puede ejecutar Python del entorno virtual sin activarlo:
+
+```powershell
+.\.venv\Scripts\python.exe app\manage.py check --settings=config.settings.test
+```
+
+> Nota: GitHub CLI (`gh`) no depende del entorno virtual de Python. Puede usarse
+> con o sin `(.venv)`.
+
+### Autenticación con GitHub CLI
+
+GitHub no acepta contraseñas de cuenta para operaciones Git por HTTPS. Para
+evitar errores como:
+
+```text
+Invalid username or token. Password authentication is not supported for Git operations.
+```
+
+Instalar GitHub CLI en Windows:
+
+```powershell
+winget install --id GitHub.cli
+```
+
+Cerrar y abrir PowerShell de nuevo. Luego comprobar:
+
+```powershell
+gh --version
+```
+
+Iniciar sesión:
+
+```powershell
+gh auth login
+```
+
+Opciones recomendadas durante el login:
+
+```text
+GitHub.com
+HTTPS
+Login with a web browser
+```
+
+Si `gh` fue instalado pero PowerShell no lo reconoce, probar con la ruta
+directa:
+
+```powershell
+& "C:\Program Files\GitHub CLI\gh.exe" --version
+& "C:\Program Files\GitHub CLI\gh.exe" auth login
+```
+
+Si no se encuentra esa ruta, buscar el ejecutable:
+
+```powershell
+Get-ChildItem "C:\Program Files" -Recurse -Filter gh.exe -ErrorAction SilentlyContinue
+```
+
+Una vez autenticado, probar:
+
+```powershell
+git pull
 ```
 
 ### Ramas principales
@@ -670,8 +834,8 @@ pueden perder cambios locales.
 Ejecutar como mínimo:
 
 ```powershell
-docker compose exec web python app/manage.py check
-docker compose exec web python app/manage.py test apps `
+docker compose exec backend python app/manage.py check
+docker compose exec backend python app/manage.py test apps `
   --settings=config.settings.test
 ```
 
@@ -715,6 +879,44 @@ La dirección correcta debe ser:
 feature/nombre-de-la-tarea -> desarrollo
 ```
 
+Ejemplo real:
+
+```text
+taeb_modulo_alumnos -> desarrollo
+```
+
+En la pantalla de GitHub debe verse:
+
+```text
+base: desarrollo
+compare: nombre-de-la-rama
+```
+
+Título sugerido:
+
+```text
+Implementa módulo de alumnos, escuelas, exámenes y mejoras visuales
+```
+
+Descripción sugerida:
+
+```text
+## Resumen
+
+Describe brevemente qué se agregó o modificó.
+
+## Cambios principales
+
+- Cambio 1
+- Cambio 2
+- Cambio 3
+
+## Validaciones
+
+- Se ejecutó `manage.py check`
+- Se probaron manualmente las pantallas modificadas
+```
+
 En GitHub se llama **Pull Request**. **Merge Request** es el nombre utilizado
 por GitLab.
 
@@ -749,6 +951,42 @@ git fetch --prune
 `git branch -D` salvo que se tenga certeza de que sus cambios ya no son
 necesarios.
 
+### 11. Seguir trabajando después de mergear un Pull Request
+
+Luego de presionar **Merge pull request** en GitHub, actualizar `desarrollo` en
+la máquina local:
+
+```powershell
+git switch desarrollo
+git pull origin desarrollo
+```
+
+Crear una nueva rama desde `desarrollo` actualizado:
+
+```powershell
+git switch -c feature/nueva-tarea
+```
+
+Ejemplo:
+
+```powershell
+git switch -c taeb_modulo_clases_asistencia
+```
+
+Comprobar que todo quedó listo:
+
+```powershell
+git status
+git branch --show-current
+python app\manage.py check --settings=config.settings.test
+```
+
+Si la rama nueva todavía no existe en GitHub, el primer push debe incluir `-u`:
+
+```powershell
+git push -u origin feature/nueva-tarea
+```
+
 ### Flujo resumido
 
 ```powershell
@@ -771,11 +1009,29 @@ git switch feature/nombre-de-la-tarea
 git merge desarrollo
 
 # Probar y publicar
-docker compose exec web python app/manage.py check
+docker compose exec backend python app/manage.py check
 git push -u origin feature/nombre-de-la-tarea
 
 # Crear en GitHub:
 # feature/nombre-de-la-tarea -> desarrollo
+```
+
+### Flujo resumido después de mergear un Pull Request
+
+```powershell
+# Activar entorno local, si se va a ejecutar Django localmente
+.\.venv\Scripts\Activate.ps1
+
+# Actualizar desarrollo con el merge hecho en GitHub
+git switch desarrollo
+git pull origin desarrollo
+
+# Crear una rama nueva
+git switch -c feature/nueva-tarea
+
+# Verificar estado
+git status
+python app\manage.py check --settings=config.settings.test
 ```
 
 ## Dumps de MySQL
@@ -839,7 +1095,7 @@ $env:MYSQL_HOST = "localhost"
 
 ### El puerto 8000 está ocupado
 
-Comprobar si el servicio web de Docker está activo:
+Comprobar si el servicio `backend` de Docker esta activo:
 
 ```powershell
 docker compose ps
@@ -848,7 +1104,7 @@ docker compose ps
 Detenerlo antes de ejecutar `python app/manage.py runserver`:
 
 ```powershell
-docker compose stop web
+docker compose stop backend
 ```
 
 ### El puerto 3306 está ocupado
@@ -869,7 +1125,15 @@ app/
 |   |   |-- migrations/
 |   |   |-- services/
 |   |   `-- tests/
+|   |-- api_mobile/
+|   |   |-- serializers.py
+|   |   |-- permissions.py
+|   |   `-- tests/
+|   |-- clases/
+|   |   |-- services/
+|   |   `-- tests/
 |   |-- core/
+|   |-- escuelas/
 |   `-- usuarios/
 |-- config/
 |   `-- settings/
@@ -882,6 +1146,9 @@ app/
 |   `-- imagenes/logos/
 |-- templates/
 |   |-- autenticacion/
+|   |-- alumnos/
+|   |-- clases/
+|   |-- escuelas/
 |   |-- layouts/
 |   |-- parciales/
 |   `-- tablero/
@@ -889,6 +1156,19 @@ app/
 docker/
 |-- django/
 `-- mysql/dumps/
+docs/
+`-- dbdiagram.dbml
+mobile/
+|-- src/
+|   |-- app/
+|   |   |-- core/
+|   |   |-- features/
+|   |   `-- app.routes.ts
+|   |-- assets/
+|   `-- environments/
+|-- capacitor.config.ts
+|-- package.json
+`-- README.md
 scripts/
 docker-compose.yml
 requirements.txt
@@ -916,3 +1196,14 @@ DJANGO_SETTINGS_MODULE=config.settings.production
 
 Producción requiere una clave secreta segura, hosts y orígenes CSRF válidos,
 HTTPS y un servidor WSGI o ASGI apropiado.
+
+Mobile:
+
+```text
+IONIC_API_BASE_URL=http://localhost:8000/api/v1/mobile
+```
+
+La documentacion especifica de la app mobile esta en
+[`mobile/README.md`](mobile/README.md). Alli se detalla como instalar
+dependencias, ejecutar Ionic, compilar la app y configurar la URL de la API
+para navegador, emulador o dispositivo fisico.

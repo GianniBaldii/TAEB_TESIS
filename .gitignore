@@ -212,6 +212,10 @@ tempCodeRunnerFile.py
 staticfiles/
 docker/mysql/dumps/*.sql
 !docker/mysql/dumps/.gitkeep
+node_modules/
+mobile/node_modules/
+mobile/.angular/
+mobile/www/
 
 # PyPI configuration file
 .pypirc

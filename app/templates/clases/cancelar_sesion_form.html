@@ -1,0 +1,35 @@
+{% extends "layouts/principal.html" %}
+
+{% block title %}Cancelar sesion | TAEB{% endblock %}
+
+{% block contenido %}
+<section class="space-y-5">
+    <div class="overflow-hidden rounded-2xl border border-red-200 bg-white shadow-sm">
+        <div class="border-b border-red-100 bg-gradient-to-r from-red-50 via-white to-slate-50 p-6">
+            <div class="flex items-center gap-4">
+                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-red-700 text-xl text-white shadow-sm">
+                    <i class="fa-solid fa-ban"></i>
+                </div>
+                <div>
+                    <a href="{% url 'clases:sesion_detail' sesion.pk %}" class="text-sm font-semibold text-red-700 hover:text-red-900"><i class="fa-solid fa-arrow-left mr-1"></i>Volver a la sesion</a>
+                    <h1 class="mt-1 text-2xl font-black text-slate-950">Cancelar sesion</h1>
+                    <p class="mt-1 text-sm text-slate-500">{{ sesion.clase.nombre }} · {{ sesion.fecha|date:"d/m/Y" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <form method="post" class="p-6">
+            {% csrf_token %}
+            <label>
+                <span class="mb-1 flex items-center gap-2 text-sm font-bold text-slate-700"><i class="fa-solid fa-message text-slate-400"></i>Motivo</span>
+                {{ form.motivo }}
+                {% if form.motivo.errors %}<span class="mt-1 block text-xs font-semibold text-red-600">{{ form.motivo.errors|join:", " }}</span>{% endif %}
+            </label>
+            <div class="mt-6 flex justify-end gap-2 border-t border-slate-100 pt-5">
+                <a href="{% url 'clases:sesion_detail' sesion.pk %}" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"><i class="fa-solid fa-xmark"></i>Volver</a>
+                <button class="inline-flex items-center gap-2 rounded-xl bg-red-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-800"><i class="fa-solid fa-ban"></i>Cancelar sesion</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

@@ -11,6 +11,31 @@ urlpatterns = [
     path("<int:pk>/editar/", views.alumno_update, name="alumno_update"),
     path("<int:pk>/baja/", views.alumno_baja, name="alumno_baja"),
     path("<int:pk>/reactivar/", views.alumno_reactivar, name="alumno_reactivar"),
+    path(
+        "<int:alumno_id>/credenciales/generar/",
+        views.alumno_credencial_generar,
+        name="alumno_credencial_generar",
+    ),
+    path(
+        "<int:alumno_id>/credenciales/resetear-password/",
+        views.alumno_credencial_resetear_password,
+        name="alumno_credencial_resetear_password",
+    ),
+    path(
+        "<int:alumno_id>/credenciales/revocar-sesiones/",
+        views.alumno_credencial_revocar_sesiones,
+        name="alumno_credencial_revocar_sesiones",
+    ),
+    path(
+        "<int:alumno_id>/credenciales/bloquear/",
+        views.alumno_credencial_bloquear,
+        name="alumno_credencial_bloquear",
+    ),
+    path(
+        "<int:alumno_id>/credenciales/reactivar/",
+        views.alumno_credencial_reactivar,
+        name="alumno_credencial_reactivar",
+    ),
     path("<int:alumno_id>/examenes/nuevo/", views.examen_create, name="examen_create"),
     path(
         "<int:alumno_id>/examenes/<int:examen_id>/",

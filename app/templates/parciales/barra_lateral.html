@@ -65,7 +65,36 @@
                     </a>
                 </div>
             </div>
-            {% include "parciales/enlace_proximamente.html" with icono="iconos/clases.svg" texto="Clases" %}
+            <div
+                x-data="{ abierto: {% if request.resolver_match.app_name == 'clases' %}true{% else %}false{% endif %} }"
+                class="space-y-1"
+            >
+                <button
+                    type="button"
+                    class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold {% if request.resolver_match.app_name == 'clases' %}bg-blue-50 text-blue-700{% else %}text-slate-600 transition hover:bg-slate-100 hover:text-slate-900{% endif %}"
+                    @click="abierto = !abierto"
+                >
+                    <span class="flex items-center gap-3">
+                        <img src="{% static 'iconos/clases.svg' %}" alt="" class="h-5 w-5">
+                        Clases
+                    </span>
+                    <span class="text-xs" x-text="abierto ? '^' : 'v'"></span>
+                </button>
+                <div x-show="abierto" class="ml-8 space-y-1">
+                    <a
+                        href="{% url 'clases:calendario' %}"
+                        class="block rounded-lg px-3 py-2 text-sm {% if request.resolver_match.url_name == 'calendario' or 'sesion' in request.resolver_match.url_name or 'asistencia' in request.resolver_match.url_name %}font-semibold text-blue-700{% else %}text-slate-600 hover:bg-slate-100 hover:text-slate-900{% endif %}"
+                    >
+                        Calendario
+                    </a>
+                    <a
+                        href="{% url 'clases:clase_list' %}"
+                        class="block rounded-lg px-3 py-2 text-sm {% if 'clase' in request.resolver_match.url_name or 'horario' in request.resolver_match.url_name or 'inscripcion' in request.resolver_match.url_name %}font-semibold text-blue-700{% else %}text-slate-600 hover:bg-slate-100 hover:text-slate-900{% endif %}"
+                    >
+                        Gestion de clases
+                    </a>
+                </div>
+            </div>
             {% include "parciales/enlace_proximamente.html" with icono="iconos/asistencias.svg" texto="Asistencias" %}
             {% include "parciales/enlace_proximamente.html" with icono="iconos/finanzas.svg" texto="Finanzas" %}
             {% include "parciales/enlace_proximamente.html" with icono="iconos/eventos.svg" texto="Eventos" %}

@@ -8,3 +8,7 @@ __pycache__
 .ruff_cache
 docker/mysql/dumps/*.sql
 staticfiles
+node_modules
+mobile/node_modules
+mobile/.angular
+mobile/www

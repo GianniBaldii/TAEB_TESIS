@@ -4,6 +4,7 @@ from django.contrib import admin
 
 from .models import (
     Alumno,
+    AlumnoCredencial,
     AlumnoEscuela,
     AlumnoCinturonHistorial,
     Cinturon,
@@ -37,6 +38,26 @@ class AlumnoAdmin(admin.ModelAdmin):
     search_fields = ("nombre", "apellido", "dni", "email", "telefono")
     autocomplete_fields = ("cinturon_actual",)
     ordering = ("apellido", "nombre")
+
+
+@admin.register(AlumnoCredencial)
+class AlumnoCredencialAdmin(admin.ModelAdmin):
+    list_display = (
+        "alumno",
+        "usuario",
+        "acceso_habilitado",
+        "debe_cambiar_password",
+        "ultimo_login_mobile",
+        "fecha_ultimo_reset_password",
+    )
+    list_filter = ("acceso_habilitado", "debe_cambiar_password")
+    search_fields = (
+        "alumno__nombre",
+        "alumno__apellido",
+        "alumno__dni",
+        "usuario__username",
+    )
+    autocomplete_fields = ("alumno", "usuario")
 
 
 @admin.register(AlumnoEscuela)
