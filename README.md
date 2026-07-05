@@ -223,7 +223,7 @@ Los servicios esperados son:
 Con los contenedores levantados:
 
 ```powershell
-docker compose exec web python app/manage.py migrate
+docker compose exec backend python app/manage.py migrate
 ```
 
 Este comando crea las tablas de Django, incluida `auth_user`.
@@ -233,7 +233,7 @@ Este comando crea las tablas de Django, incluida `auth_user`.
 Crear un superusuario:
 
 ```powershell
-docker compose exec web python app/manage.py createsuperuser
+docker compose exec backend python app/manage.py createsuperuser
 ```
 
 Django solicitará:
@@ -279,7 +279,7 @@ docker compose logs -f
 Ver únicamente los logs de Django:
 
 ```powershell
-docker compose logs -f web
+docker compose logs -f backend
 ```
 
 Los datos de MySQL se conservan en el volumen `mysql_data` al ejecutar
@@ -481,38 +481,38 @@ docker compose up -d db
 Reconstruir Django después de cambiar dependencias o el Dockerfile:
 
 ```powershell
-docker compose up -d --build web
+docker compose up -d --build backend
 ```
 
 Ejecutar migraciones:
 
 ```powershell
-docker compose exec web python app/manage.py migrate
+docker compose exec backend python app/manage.py migrate
 ```
 
 Crear un superusuario:
 
 ```powershell
-docker compose exec web python app/manage.py createsuperuser
+docker compose exec backend python app/manage.py createsuperuser
 ```
 
 Comprobar la configuración de Django:
 
 ```powershell
-docker compose exec web python app/manage.py check
+docker compose exec backend python app/manage.py check
 ```
 
 Ejecutar tests:
 
 ```powershell
-docker compose exec web python app/manage.py test apps `
+docker compose exec backend python app/manage.py test apps `
   --settings=config.settings.test
 ```
 
 Abrir una consola de Django:
 
 ```powershell
-docker compose exec web python app/manage.py shell
+docker compose exec backend python app/manage.py shell
 ```
 
 ## Versionado del proyecto
@@ -834,8 +834,8 @@ pueden perder cambios locales.
 Ejecutar como mínimo:
 
 ```powershell
-docker compose exec web python app/manage.py check
-docker compose exec web python app/manage.py test apps `
+docker compose exec backend python app/manage.py check
+docker compose exec backend python app/manage.py test apps `
   --settings=config.settings.test
 ```
 
@@ -1009,7 +1009,7 @@ git switch feature/nombre-de-la-tarea
 git merge desarrollo
 
 # Probar y publicar
-docker compose exec web python app/manage.py check
+docker compose exec backend python app/manage.py check
 git push -u origin feature/nombre-de-la-tarea
 
 # Crear en GitHub:
@@ -1095,7 +1095,7 @@ $env:MYSQL_HOST = "localhost"
 
 ### El puerto 8000 está ocupado
 
-Comprobar si el servicio web de Docker está activo:
+Comprobar si el servicio `backend` de Docker esta activo:
 
 ```powershell
 docker compose ps
@@ -1104,7 +1104,7 @@ docker compose ps
 Detenerlo antes de ejecutar `python app/manage.py runserver`:
 
 ```powershell
-docker compose stop web
+docker compose stop backend
 ```
 
 ### El puerto 3306 está ocupado
@@ -1125,7 +1125,15 @@ app/
 |   |   |-- migrations/
 |   |   |-- services/
 |   |   `-- tests/
+|   |-- api_mobile/
+|   |   |-- serializers.py
+|   |   |-- permissions.py
+|   |   `-- tests/
+|   |-- clases/
+|   |   |-- services/
+|   |   `-- tests/
 |   |-- core/
+|   |-- escuelas/
 |   `-- usuarios/
 |-- config/
 |   `-- settings/
@@ -1138,6 +1146,9 @@ app/
 |   `-- imagenes/logos/
 |-- templates/
 |   |-- autenticacion/
+|   |-- alumnos/
+|   |-- clases/
+|   |-- escuelas/
 |   |-- layouts/
 |   |-- parciales/
 |   `-- tablero/
@@ -1145,6 +1156,19 @@ app/
 docker/
 |-- django/
 `-- mysql/dumps/
+docs/
+`-- dbdiagram.dbml
+mobile/
+|-- src/
+|   |-- app/
+|   |   |-- core/
+|   |   |-- features/
+|   |   `-- app.routes.ts
+|   |-- assets/
+|   `-- environments/
+|-- capacitor.config.ts
+|-- package.json
+`-- README.md
 scripts/
 docker-compose.yml
 requirements.txt
@@ -1172,3 +1196,14 @@ DJANGO_SETTINGS_MODULE=config.settings.production
 
 Producción requiere una clave secreta segura, hosts y orígenes CSRF válidos,
 HTTPS y un servidor WSGI o ASGI apropiado.
+
+Mobile:
+
+```text
+IONIC_API_BASE_URL=http://localhost:8000/api/v1/mobile
+```
+
+La documentacion especifica de la app mobile esta en
+[`mobile/README.md`](mobile/README.md). Alli se detalla como instalar
+dependencias, ejecutar Ionic, compilar la app y configurar la URL de la API
+para navegador, emulador o dispositivo fisico.
