@@ -15,9 +15,9 @@
 
                 <div class="flex flex-wrap items-center gap-2">
                     {% include "alumnos/partials/belt_badge.html" with cinturon=alumno.cinturon_actual %}
-                    <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold {% if alumno.activo %}border-green-200 bg-green-50 text-green-700{% else %}border-slate-200 bg-slate-100 text-slate-600{% endif %}">
-                        <i class="fa-solid {% if alumno.activo %}fa-circle-check{% else %}fa-circle-pause{% endif %}"></i>
-                        {% if alumno.activo %}Activo{% else %}Inactivo{% endif %}
+                    <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold {% if inscripcion.activo %}border-green-200 bg-green-50 text-green-700{% else %}border-slate-200 bg-slate-100 text-slate-600{% endif %}">
+                        <i class="fa-solid {% if inscripcion.activo %}fa-circle-check{% else %}fa-circle-pause{% endif %}"></i>
+                        {% if inscripcion.activo %}Activo{% else %}Inactivo{% endif %}
                     </span>
                 </div>
             </div>
