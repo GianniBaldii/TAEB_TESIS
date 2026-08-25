@@ -15,11 +15,13 @@ class AsistenciaClase(models.Model):
         "clases.ClaseSesion",
         on_delete=models.PROTECT,
         related_name="asistencias",
+        db_column="id_sesion",
     )
     clase_alumno = models.ForeignKey(
         "clases.ClaseAlumno",
         on_delete=models.PROTECT,
         related_name="asistencias",
+        db_column="id_clase_alumno",
     )
     estado = models.CharField(
         max_length=15,
@@ -33,11 +35,13 @@ class AsistenciaClase(models.Model):
         related_name="asistencias_registradas",
         null=True,
         blank=True,
+        db_column="id_usuario_registro",
     )
     fecha_registro = models.DateTimeField(auto_now_add=True)
     fecha_modificacion = models.DateTimeField(auto_now=True)
 
     class Meta:
+        db_table = "clases_asistencias"
         ordering = ["clase_alumno__alumno_escuela__alumno__apellido"]
         constraints = [
             models.UniqueConstraint(

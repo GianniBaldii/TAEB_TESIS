@@ -8,10 +8,12 @@ class EscuelaDocente(models.Model):
         COORDINADOR = "COORDINADOR", "Coordinador"
 
     escuela = models.ForeignKey(
-        "escuelas.Escuela", on_delete=models.PROTECT, related_name="docentes"
+        "escuelas.Escuela", on_delete=models.PROTECT, related_name="docentes",
+        db_column="id_escuela",
     )
     docente = models.ForeignKey(
-        "usuarios.Docente", on_delete=models.PROTECT, related_name="escuelas"
+        "usuarios.Docente", on_delete=models.PROTECT, related_name="escuelas",
+        db_column="id_docente",
     )
     rol = models.CharField(max_length=20, choices=Rol.choices, default=Rol.DOCENTE)
     activo = models.BooleanField(default=True)
@@ -19,6 +21,7 @@ class EscuelaDocente(models.Model):
     fecha_baja = models.DateField(null=True, blank=True)
 
     class Meta:
+        db_table = "escuelas_docentes"
         ordering = ["fecha_alta", "pk"]
         constraints = [
             models.UniqueConstraint(

@@ -14,16 +14,20 @@ class Examen(models.Model):
         ANULADO = "ANULADO", "Anulado"
 
     alumno = models.ForeignKey(
-        Alumno, on_delete=models.PROTECT, related_name="examenes"
+        Alumno, on_delete=models.PROTECT, related_name="examenes",
+        db_column="id_alumno",
     )
     examen_template = models.ForeignKey(
-        ExamenTemplate, on_delete=models.PROTECT, related_name="examenes"
+        ExamenTemplate, on_delete=models.PROTECT, related_name="examenes",
+        db_column="id_plantilla",
     )
     cinturon_origen = models.ForeignKey(
-        Cinturon, on_delete=models.PROTECT, related_name="examenes_origen"
+        Cinturon, on_delete=models.PROTECT, related_name="examenes_origen",
+        db_column="id_cinturon_origen",
     )
     cinturon_destino = models.ForeignKey(
-        Cinturon, on_delete=models.PROTECT, related_name="examenes_destino"
+        Cinturon, on_delete=models.PROTECT, related_name="examenes_destino",
+        db_column="id_cinturon_destino",
     )
     fecha_examen = models.DateField()
     lugar = models.CharField(max_length=150, null=True, blank=True)
@@ -40,6 +44,7 @@ class Examen(models.Model):
     fecha_modificacion = models.DateTimeField(auto_now=True)
 
     class Meta:
+        db_table = "alumnos_examenes"
         ordering = ["-fecha_examen", "-fecha_creacion"]
         verbose_name = "Examen"
         verbose_name_plural = "Examenes"
@@ -50,10 +55,12 @@ class Examen(models.Model):
 
 class ExamenDetalle(models.Model):
     examen = models.ForeignKey(
-        Examen, on_delete=models.CASCADE, related_name="detalles"
+        Examen, on_delete=models.CASCADE, related_name="detalles",
+        db_column="id_examen",
     )
     template_item = models.ForeignKey(
-        ExamenTemplateItem, on_delete=models.PROTECT, related_name="detalles_examen"
+        ExamenTemplateItem, on_delete=models.PROTECT, related_name="detalles_examen",
+        db_column="id_plantilla_item",
     )
     nota_numerica = models.DecimalField(
         max_digits=5, decimal_places=2, null=True, blank=True
@@ -64,6 +71,7 @@ class ExamenDetalle(models.Model):
     observaciones = models.TextField(null=True, blank=True)
 
     class Meta:
+        db_table = "alumnos_examenes_detalles"
         ordering = ["template_item__seccion__orden", "template_item__orden"]
         constraints = [
             models.UniqueConstraint(

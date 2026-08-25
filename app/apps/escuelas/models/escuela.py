@@ -16,6 +16,7 @@ class Escuela(models.Model):
     fecha_modificacion = models.DateTimeField(auto_now=True)
 
     class Meta:
+        db_table = "escuelas"
         ordering = ["nombre"]
         verbose_name = "Escuela"
         verbose_name_plural = "Escuelas"

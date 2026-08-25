@@ -7,6 +7,7 @@ class Docente(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="perfil_docente",
+        db_column="id_usuario",
     )
     dni = models.CharField(max_length=20, unique=True)
     telefono = models.CharField(max_length=30, null=True, blank=True)
@@ -16,6 +17,7 @@ class Docente(models.Model):
     fecha_modificacion = models.DateTimeField(auto_now=True)
 
     class Meta:
+        db_table = "usuarios_docentes"
         ordering = ["usuario__last_name", "usuario__first_name", "usuario__username"]
         verbose_name = "Docente"
         verbose_name_plural = "Docentes"

@@ -7,11 +7,13 @@ class AlumnoCredencial(models.Model):
         "alumnos.Alumno",
         on_delete=models.PROTECT,
         related_name="credencial_mobile",
+        db_column="id_alumno",
     )
     usuario = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="credencial_alumno",
+        db_column="id_usuario",
     )
     acceso_habilitado = models.BooleanField(
         default=True,
@@ -33,6 +35,7 @@ class AlumnoCredencial(models.Model):
     fecha_modificacion = models.DateTimeField(auto_now=True)
 
     class Meta:
+        db_table = "alumnos_credenciales"
         verbose_name = "Credencial mobile de alumno"
         verbose_name_plural = "Credenciales mobile de alumnos"
 

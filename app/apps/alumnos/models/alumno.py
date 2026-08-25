@@ -28,12 +28,14 @@ class Alumno(models.Model):
         null=True,
         blank=True,
         related_name="alumnos_actuales",
+        db_column="id_cinturon_actual",
     )
     activo = models.BooleanField(default=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_modificacion = models.DateTimeField(auto_now=True)
 
     class Meta:
+        db_table = "alumnos"
         ordering = ["apellido", "nombre"]
         verbose_name = "Alumno"
         verbose_name_plural = "Alumnos"
