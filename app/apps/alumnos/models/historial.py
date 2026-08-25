@@ -7,10 +7,12 @@ from .examen import Examen
 
 class AlumnoCinturonHistorial(models.Model):
     alumno = models.ForeignKey(
-        Alumno, on_delete=models.PROTECT, related_name="historial_cinturones"
+        Alumno, on_delete=models.PROTECT, related_name="historial_cinturones",
+        db_column="id_alumno",
     )
     cinturon = models.ForeignKey(
-        Cinturon, on_delete=models.PROTECT, related_name="historial_alumnos"
+        Cinturon, on_delete=models.PROTECT, related_name="historial_alumnos",
+        db_column="id_cinturon",
     )
     examen = models.OneToOneField(
         Examen,
@@ -18,12 +20,14 @@ class AlumnoCinturonHistorial(models.Model):
         related_name="historial_cinturon",
         null=True,
         blank=True,
+        db_column="id_examen",
     )
     fecha_obtencion = models.DateField()
     observaciones = models.TextField(null=True, blank=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        db_table = "alumnos_cinturones_historial"
         ordering = ["fecha_obtencion", "cinturon__orden"]
         constraints = [
             models.UniqueConstraint(

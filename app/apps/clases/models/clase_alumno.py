@@ -7,11 +7,13 @@ class ClaseAlumno(models.Model):
         "clases.Clase",
         on_delete=models.PROTECT,
         related_name="inscripciones_alumnos",
+        db_column="id_clase",
     )
     alumno_escuela = models.ForeignKey(
         "alumnos.AlumnoEscuela",
         on_delete=models.PROTECT,
         related_name="clases_inscriptas",
+        db_column="id_alumno_escuela",
     )
     activo = models.BooleanField(default=True)
     fecha_alta = models.DateField(auto_now_add=True)
@@ -21,6 +23,7 @@ class ClaseAlumno(models.Model):
     fecha_modificacion = models.DateTimeField(auto_now=True)
 
     class Meta:
+        db_table = "clases_alumnos"
         ordering = ["-activo", "alumno_escuela__alumno__apellido"]
         constraints = [
             models.UniqueConstraint(
@@ -43,4 +46,3 @@ class ClaseAlumno(models.Model):
 
     def __str__(self):
         return f"{self.alumno_escuela.alumno} - {self.clase}"
-

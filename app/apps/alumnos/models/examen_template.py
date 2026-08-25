@@ -5,7 +5,8 @@ from .cinturon import Cinturon
 
 class ExamenTemplate(models.Model):
     cinturon = models.ForeignKey(
-        Cinturon, on_delete=models.PROTECT, related_name="templates_examen"
+        Cinturon, on_delete=models.PROTECT, related_name="templates_examen",
+        db_column="id_cinturon",
     )
     nombre = models.CharField(max_length=150)
     descripcion = models.TextField(null=True, blank=True)
@@ -19,6 +20,7 @@ class ExamenTemplate(models.Model):
         null=True,
         blank=True,
         related_name="versiones_derivadas",
+        db_column="id_plantilla_origen",
     )
     vigente_desde = models.DateField(null=True, blank=True)
     vigente_hasta = models.DateField(null=True, blank=True)
@@ -27,6 +29,7 @@ class ExamenTemplate(models.Model):
     fecha_modificacion = models.DateTimeField(auto_now=True)
 
     class Meta:
+        db_table = "alumnos_examenes_plantillas"
         ordering = ["cinturon__orden", "nombre", "-version"]
         verbose_name = "Template de examen"
         verbose_name_plural = "Templates de examenes"
@@ -37,7 +40,8 @@ class ExamenTemplate(models.Model):
 
 class ExamenTemplateSeccion(models.Model):
     examen_template = models.ForeignKey(
-        ExamenTemplate, on_delete=models.CASCADE, related_name="secciones"
+        ExamenTemplate, on_delete=models.CASCADE, related_name="secciones",
+        db_column="id_plantilla",
     )
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField(null=True, blank=True)
@@ -46,6 +50,7 @@ class ExamenTemplateSeccion(models.Model):
     activo = models.BooleanField(default=True)
 
     class Meta:
+        db_table = "alumnos_examenes_plantillas_secciones"
         ordering = ["orden"]
         constraints = [
             models.UniqueConstraint(
@@ -68,7 +73,8 @@ class ExamenTemplateItem(models.Model):
         CHECK = "CHECK", "Check"
 
     seccion = models.ForeignKey(
-        ExamenTemplateSeccion, on_delete=models.CASCADE, related_name="items"
+        ExamenTemplateSeccion, on_delete=models.CASCADE, related_name="items",
+        db_column="id_seccion",
     )
     nombre = models.CharField(max_length=150)
     descripcion = models.TextField(null=True, blank=True)
@@ -84,6 +90,7 @@ class ExamenTemplateItem(models.Model):
     activo = models.BooleanField(default=True)
 
     class Meta:
+        db_table = "alumnos_examenes_plantillas_items"
         ordering = ["seccion__orden", "orden"]
         verbose_name = "Item de template"
         verbose_name_plural = "Items de template"

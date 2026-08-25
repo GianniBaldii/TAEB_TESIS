@@ -16,6 +16,7 @@ class ClaseHorario(models.Model):
         "clases.Clase",
         on_delete=models.CASCADE,
         related_name="horarios",
+        db_column="id_clase",
     )
     dia_semana = models.PositiveSmallIntegerField(choices=DiaSemana.choices)
     hora_inicio = models.TimeField()
@@ -27,6 +28,7 @@ class ClaseHorario(models.Model):
     fecha_modificacion = models.DateTimeField(auto_now=True)
 
     class Meta:
+        db_table = "clases_horarios"
         ordering = ["dia_semana", "hora_inicio"]
         constraints = [
             models.UniqueConstraint(
@@ -51,4 +53,3 @@ class ClaseHorario(models.Model):
             f"{self.clase} - {self.get_dia_semana_display()} "
             f"{self.hora_inicio:%H:%M}"
         )
-

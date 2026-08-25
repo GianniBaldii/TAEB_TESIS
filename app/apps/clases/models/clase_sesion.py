@@ -13,6 +13,7 @@ class ClaseSesion(models.Model):
         "clases.Clase",
         on_delete=models.PROTECT,
         related_name="sesiones",
+        db_column="id_clase",
     )
     horario = models.ForeignKey(
         "clases.ClaseHorario",
@@ -20,6 +21,7 @@ class ClaseSesion(models.Model):
         related_name="sesiones",
         null=True,
         blank=True,
+        db_column="id_horario",
     )
     fecha = models.DateField()
     hora_inicio = models.TimeField()
@@ -30,6 +32,7 @@ class ClaseSesion(models.Model):
         related_name="sesiones_a_cargo",
         null=True,
         blank=True,
+        db_column="id_docente_a_cargo",
     )
     estado = models.CharField(
         max_length=15,
@@ -43,6 +46,7 @@ class ClaseSesion(models.Model):
     fecha_modificacion = models.DateTimeField(auto_now=True)
 
     class Meta:
+        db_table = "clases_sesiones"
         ordering = ["fecha", "hora_inicio"]
         constraints = [
             models.UniqueConstraint(
@@ -75,4 +79,3 @@ class ClaseSesion(models.Model):
 
     def __str__(self):
         return f"{self.clase.nombre} - {self.fecha} {self.hora_inicio:%H:%M}"
-

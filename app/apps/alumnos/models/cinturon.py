@@ -14,6 +14,7 @@ class Cinturon(models.Model):
     activo = models.BooleanField(default=True)
 
     class Meta:
+        db_table = "alumnos_cinturones"
         ordering = ["orden"]
         constraints = [
             models.UniqueConstraint(
