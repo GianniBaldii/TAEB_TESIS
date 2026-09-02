@@ -97,7 +97,14 @@
             </div>
             {% include "parciales/enlace_proximamente.html" with icono="iconos/asistencias.svg" texto="Asistencias" %}
             {% include "parciales/enlace_proximamente.html" with icono="iconos/finanzas.svg" texto="Finanzas" %}
-            {% include "parciales/enlace_proximamente.html" with icono="iconos/eventos.svg" texto="Eventos" %}
+            <a
+                href="{% url 'publicaciones:publicacion_list' %}"
+                class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold {% if request.resolver_match.app_name == 'publicaciones' %}bg-blue-50 text-blue-700{% else %}text-slate-600 transition hover:bg-slate-100 hover:text-slate-900{% endif %}"
+                {% if request.resolver_match.app_name == 'publicaciones' %}aria-current="page"{% endif %}
+            >
+                <img src="{% static 'iconos/publicaciones.svg' %}" alt="" class="h-5 w-5">
+                Publicaciones
+            </a>
         </div>
 
         {% if request.user.is_superuser %}

@@ -1,0 +1,4 @@
+<span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold {% if publicacion.tipo_publicacion == 'EVENTO' %}border-blue-200 bg-blue-50 text-blue-700{% else %}border-sky-200 bg-sky-50 text-sky-700{% endif %}">
+    <i class="fa-solid {% if publicacion.tipo_publicacion == 'EVENTO' %}fa-calendar-day{% else %}fa-bullhorn{% endif %}"></i>
+    {{ publicacion.get_tipo_publicacion_display }}
+</span>
