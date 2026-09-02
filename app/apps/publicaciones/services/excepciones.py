@@ -1,0 +1,2 @@
+class PublicacionesError(Exception):
+    pass

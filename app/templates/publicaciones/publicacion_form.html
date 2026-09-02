@@ -1,0 +1,88 @@
+{% extends "layouts/principal.html" %}
+
+{% block title %}{% if modo == "crear" %}Nueva publicación{% else %}Editar publicación{% endif %} | TAEB{% endblock %}
+
+{% block contenido %}
+<section class="space-y-5">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-100 bg-gradient-to-r from-blue-50 via-white to-slate-50 p-6">
+            <div class="flex items-center gap-4">
+                <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-700 text-xl text-white shadow-sm"><i class="fa-solid {% if modo == 'crear' %}fa-plus{% else %}fa-pen{% endif %}"></i></div>
+                <div>
+                    <a href="{% url 'publicaciones:publicacion_list' %}" class="text-sm font-semibold text-blue-700 hover:text-blue-900"><i class="fa-solid fa-arrow-left mr-1"></i>Volver a publicaciones</a>
+                    <h1 class="mt-1 text-2xl font-black text-slate-950">{% if modo == "crear" %}Nueva publicación{% else %}Editar publicación{% endif %}</h1>
+                    <p class="mt-1 text-sm text-slate-500">La publicación se guarda como borrador hasta que decidas publicarla.</p>
+                </div>
+            </div>
+        </div>
+
+        <form method="post" class="p-6">
+            {% csrf_token %}
+            {% if form.non_field_errors %}<div class="mb-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">{{ form.non_field_errors }}</div>{% endif %}
+            <div class="grid gap-5 md:grid-cols-2">
+                {% for field in form %}
+                <label
+                    {% if field.name == "ubicacion" or field.name == "cupo_maximo" %}
+                    data-event-only
+                    {% endif %}
+                    class="{% if field.name == 'descripcion' %}md:col-span-2{% endif %}"
+                >
+                    <span class="mb-1 block text-sm font-bold text-slate-700">{{ field.label }}</span>
+                    {% if field.name == "fecha_hora_inicio" or field.name == "fecha_hora_fin" %}
+                    <span class="grid grid-cols-2 gap-2">{{ field }}</span>
+                    {% else %}
+                    {{ field }}
+                    {% endif %}
+                    {% if field.name == "tipo_publicacion" %}<span class="mt-1 block text-xs text-slate-500">Los anuncios son informativos; los eventos requieren fecha y hora de inicio.</span>{% endif %}
+                    {% if field.name == "fecha_hora_inicio" %}<span class="mt-1 block text-xs text-slate-500">En anuncios es opcional. En eventos es obligatorio.</span>{% endif %}
+                    {% if field.name == "ubicacion" or field.name == "cupo_maximo" %}<span class="mt-1 block text-xs text-slate-500">Este campo solo corresponde a eventos.</span>{% endif %}
+                    {% if field.errors %}<span class="mt-1 block text-xs font-semibold text-red-600">{{ field.errors|join:", " }}</span>{% endif %}
+                </label>
+                {% endfor %}
+            </div>
+            <div class="mt-5 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500">
+                <i class="fa-solid fa-layer-group mr-1"></i>
+                La asociación con clases y divisiones etarias se incorporará en una etapa posterior.
+            </div>
+            <div class="mt-6 flex justify-end gap-2 border-t border-slate-100 pt-5">
+                <a href="{% if publicacion %}{% url 'publicaciones:publicacion_detail' publicacion.pk %}{% else %}{% url 'publicaciones:publicacion_list' %}{% endif %}" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"><i class="fa-solid fa-xmark"></i>Cancelar</a>
+                <button class="inline-flex items-center gap-2 rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-800"><i class="fa-solid fa-floppy-disk"></i>Guardar borrador</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const tipoPublicacion = document.getElementById("id_tipo_publicacion");
+        const camposSoloEvento = document.querySelectorAll("[data-event-only]");
+
+        function actualizarCamposEvento() {
+            const esEvento = tipoPublicacion.value === "EVENTO";
+
+            camposSoloEvento.forEach(function (contenedor) {
+                contenedor.hidden = !esEvento;
+
+                const campos = contenedor.querySelectorAll(
+                    "input, select, textarea"
+                );
+
+                campos.forEach(function (campo) {
+                    campo.disabled = !esEvento;
+
+                    if (!esEvento) {
+                        campo.value = "";
+                    }
+                });
+            });
+        }
+
+        tipoPublicacion.addEventListener(
+            "change",
+            actualizarCamposEvento
+        );
+
+        actualizarCamposEvento();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,4 @@
+<span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold {% if publicacion.estado == 'PUBLICADO' %}border-emerald-200 bg-emerald-50 text-emerald-700{% elif publicacion.estado == 'CANCELADO' %}border-red-200 bg-red-50 text-red-700{% elif publicacion.estado == 'FINALIZADO' %}border-blue-200 bg-blue-50 text-blue-700{% else %}border-slate-200 bg-slate-100 text-slate-600{% endif %}">
+    <i class="fa-solid {% if publicacion.estado == 'PUBLICADO' %}fa-circle-check{% elif publicacion.estado == 'CANCELADO' %}fa-ban{% elif publicacion.estado == 'FINALIZADO' %}fa-flag-checkered{% else %}fa-pen-ruler{% endif %}"></i>
+    {{ publicacion.get_estado_display }}{% if not publicacion.activo %} · Desactivada{% endif %}
+</span>

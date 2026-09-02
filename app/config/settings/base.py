@@ -39,6 +39,7 @@ LOCAL_APPS = [
     "apps.escuelas",
     "apps.alumnos",
     "apps.clases",
+    "apps.publicaciones",
     "apps.api_mobile",
 ]
 
