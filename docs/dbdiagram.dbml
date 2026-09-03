@@ -19,9 +19,9 @@ Table auth_user {
   Note: "Tabla estándar de usuarios de Django."
 }
 
-Table usuarios_docente {
+Table usuarios_docentes {
   id bigint [pk, increment]
-  usuario_id int [not null, unique]
+  id_usuario int [not null, unique]
   dni varchar(20) [not null, unique]
   telefono varchar(30)
   fecha_nacimiento date
@@ -30,7 +30,7 @@ Table usuarios_docente {
   fecha_modificacion datetime [not null]
 }
 
-Table escuelas_escuela {
+Table escuelas {
   id bigint [pk, increment]
   nombre varchar(150) [not null]
   nombre_comercial varchar(150)
@@ -46,21 +46,21 @@ Table escuelas_escuela {
   fecha_modificacion datetime [not null]
 }
 
-Table escuelas_escueladocente {
+Table escuelas_docentes {
   id bigint [pk, increment]
-  escuela_id bigint [not null]
-  docente_id bigint [not null]
+  id_escuela bigint [not null]
+  id_docente bigint [not null]
   rol varchar(20) [not null, default: "DOCENTE", note: "ADMINISTRADOR | DOCENTE | COORDINADOR"]
   activo bool [not null, default: true]
   fecha_alta date [not null]
   fecha_baja date
 
   Indexes {
-    (escuela_id, docente_id) [unique, name: "uq_escuela_docente"]
+    (id_escuela, id_docente) [unique, name: "uq_escuela_docente"]
   }
 }
 
-Table alumnos_cinturon {
+Table alumnos_cinturones {
   id bigint [pk, increment]
   nombre varchar(100) [not null]
   color varchar(80) [not null]
@@ -74,7 +74,7 @@ Table alumnos_cinturon {
   }
 }
 
-Table alumnos_alumno {
+Table alumnos {
   id bigint [pk, increment]
   nombre varchar(100) [not null]
   apellido varchar(100) [not null]
@@ -86,16 +86,16 @@ Table alumnos_alumno {
   direccion varchar(255)
   peso_aproximado decimal(5,2)
   altura_aproximada decimal(4,2)
-  cinturon_actual_id bigint
+  id_cinturon_actual bigint
   activo bool [not null, default: true]
   fecha_creacion datetime [not null]
   fecha_modificacion datetime [not null]
 }
 
-Table alumnos_alumnoescuela {
+Table alumnos_escuelas {
   id bigint [pk, increment]
-  alumno_id bigint [not null]
-  escuela_id bigint [not null]
+  id_alumno bigint [not null]
+  id_escuela bigint [not null]
   activo bool [not null, default: true]
   fecha_inscripcion date [not null]
   fecha_baja date
@@ -104,18 +104,18 @@ Table alumnos_alumnoescuela {
   fecha_modificacion datetime [not null]
 
   Indexes {
-    (alumno_id, escuela_id) [unique, name: "uq_alumno_escuela"]
+    (id_alumno, id_escuela) [unique, name: "uq_alumno_escuela"]
   }
 }
 
-Table alumnos_examentemplate {
+Table alumnos_examenes_plantillas {
   id bigint [pk, increment]
-  cinturon_id bigint [not null]
+  id_cinturon bigint [not null]
   nombre varchar(150) [not null]
   descripcion text
   nota_minima_aprobacion decimal(5,2)
   version smallint [not null, default: 1]
-  template_origen_id bigint
+  id_plantilla_origen bigint
   vigente_desde date
   vigente_hasta date
   activo bool [not null, default: true]
@@ -123,9 +123,9 @@ Table alumnos_examentemplate {
   fecha_modificacion datetime [not null]
 }
 
-Table alumnos_examentemplateseccion {
+Table alumnos_examenes_plantillas_secciones {
   id bigint [pk, increment]
-  examen_template_id bigint [not null]
+  id_plantilla bigint [not null]
   nombre varchar(100) [not null]
   descripcion text
   orden smallint [not null, default: 1]
@@ -133,13 +133,13 @@ Table alumnos_examentemplateseccion {
   activo bool [not null, default: true]
 
   Indexes {
-    (examen_template_id, nombre) [unique, name: "seccion_template_nombre_unicos"]
+    (id_plantilla, nombre) [unique, name: "seccion_template_nombre_unicos"]
   }
 }
 
-Table alumnos_examentemplateitem {
+Table alumnos_examenes_plantillas_items {
   id bigint [pk, increment]
-  seccion_id bigint [not null]
+  id_seccion bigint [not null]
   nombre varchar(150) [not null]
   descripcion text
   tipo_evaluacion varchar(10) [not null, note: "NUMERICA | CONCEPTO | TEXTO | CHECK"]
@@ -150,12 +150,12 @@ Table alumnos_examentemplateitem {
   activo bool [not null, default: true]
 }
 
-Table alumnos_examen {
+Table alumnos_examenes {
   id bigint [pk, increment]
-  alumno_id bigint [not null]
-  examen_template_id bigint [not null]
-  cinturon_origen_id bigint [not null]
-  cinturon_destino_id bigint [not null]
+  id_alumno bigint [not null]
+  id_plantilla bigint [not null]
+  id_cinturon_origen bigint [not null]
+  id_cinturon_destino bigint [not null]
   fecha_examen date [not null]
   lugar varchar(150)
   es_historico bool [not null, default: false]
@@ -167,10 +167,10 @@ Table alumnos_examen {
   fecha_modificacion datetime [not null]
 }
 
-Table alumnos_examendetalle {
+Table alumnos_examenes_detalles {
   id bigint [pk, increment]
-  examen_id bigint [not null]
-  template_item_id bigint [not null]
+  id_examen bigint [not null]
+  id_plantilla_item bigint [not null]
   nota_numerica decimal(5,2)
   concepto varchar(50)
   valor_texto text
@@ -178,46 +178,123 @@ Table alumnos_examendetalle {
   observaciones text
 
   Indexes {
-    (examen_id, template_item_id) [unique, name: "detalle_examen_template_item_unicos"]
+    (id_examen, id_plantilla_item) [unique, name: "detalle_examen_template_item_unicos"]
   }
 }
 
-Table alumnos_alumnocinturonhistorial {
+Table alumnos_cinturones_historial {
   id bigint [pk, increment]
-  alumno_id bigint [not null]
-  cinturon_id bigint [not null]
-  examen_id bigint [unique]
+  id_alumno bigint [not null]
+  id_cinturon bigint [not null]
+  id_examen bigint [unique]
   fecha_obtencion date [not null]
   observaciones text
   fecha_creacion datetime [not null]
 
   Indexes {
-    (alumno_id, cinturon_id) [unique, name: "historial_alumno_cinturon_unicos"]
+    (id_alumno, id_cinturon) [unique, name: "historial_alumno_cinturon_unicos"]
   }
 }
 
-Ref: usuarios_docente.usuario_id - auth_user.id [delete: restrict]
+Table finanzas_conceptos {
+  id bigint [pk, increment]
+  id_escuela bigint [not null]
+  codigo varchar(20) [not null, note: "CUOTA | EXAMEN | TORNEO"]
+  nombre varchar(100) [not null]
+  descripcion text
+  activo bool [not null, default: true]
+  fecha_creacion datetime [not null]
+  fecha_modificacion datetime [not null]
+  Indexes { (id_escuela, codigo) [unique, name: "uq_finanzas_concepto_escuela_codigo"] }
+}
 
-Ref: escuelas_escueladocente.escuela_id > escuelas_escuela.id [delete: restrict]
-Ref: escuelas_escueladocente.docente_id > usuarios_docente.id [delete: restrict]
+Table finanzas_configuraciones_cuota {
+  id bigint [pk, increment]
+  id_escuela bigint [not null, unique]
+  monto_actual decimal(12,2) [not null]
+  dia_vencimiento smallint [not null]
+  dias_tolerancia smallint [not null]
+  activa bool [not null, default: true]
+  fecha_creacion datetime [not null]
+  fecha_modificacion datetime [not null]
+}
 
-Ref: alumnos_alumno.cinturon_actual_id > alumnos_cinturon.id [delete: restrict]
-Ref: alumnos_alumnoescuela.alumno_id > alumnos_alumno.id [delete: restrict]
-Ref: alumnos_alumnoescuela.escuela_id > escuelas_escuela.id [delete: restrict]
+Table finanzas_obligaciones {
+  id bigint [pk, increment]
+  id_escuela bigint [not null]
+  id_alumno_escuela bigint [not null]
+  id_concepto_financiero bigint [not null]
+  descripcion varchar(255) [not null]
+  monto_original decimal(12,2) [not null]
+  periodo_anio smallint
+  periodo_mes smallint
+  fecha_generacion date [not null]
+  fecha_vencimiento date [not null]
+  fecha_atraso date [not null]
+  clave_origen varchar(100) [unique]
+  estado_operativo varchar(10) [not null, note: "ACTIVA | ANULADA"]
+  id_usuario_creacion int [not null]
+  fecha_creacion datetime [not null]
+  fecha_modificacion datetime [not null]
+}
 
-Ref: alumnos_examentemplate.cinturon_id > alumnos_cinturon.id [delete: restrict]
-Ref: alumnos_examentemplate.template_origen_id > alumnos_examentemplate.id [delete: restrict]
-Ref: alumnos_examentemplateseccion.examen_template_id > alumnos_examentemplate.id [delete: cascade]
-Ref: alumnos_examentemplateitem.seccion_id > alumnos_examentemplateseccion.id [delete: cascade]
+Table finanzas_pagos {
+  id bigint [pk, increment]
+  id_escuela bigint [not null]
+  id_alumno_escuela bigint [not null]
+  monto_total decimal(12,2) [not null]
+  metodo_pago varchar(20) [not null, note: "EFECTIVO | TRANSFERENCIA"]
+  estado varchar(12) [not null, note: "PENDIENTE | CONFIRMADO | ANULADO"]
+  fecha_pago date [not null]
+  referencia varchar(150)
+  observaciones text
+  id_usuario_registro int [not null]
+  fecha_creacion datetime [not null]
+  fecha_modificacion datetime [not null]
+}
 
-Ref: alumnos_examen.alumno_id > alumnos_alumno.id [delete: restrict]
-Ref: alumnos_examen.examen_template_id > alumnos_examentemplate.id [delete: restrict]
-Ref: alumnos_examen.cinturon_origen_id > alumnos_cinturon.id [delete: restrict]
-Ref: alumnos_examen.cinturon_destino_id > alumnos_cinturon.id [delete: restrict]
+Table finanzas_pagos_aplicaciones {
+  id bigint [pk, increment]
+  id_pago bigint [not null]
+  id_obligacion_pago bigint [not null]
+  monto_aplicado decimal(12,2) [not null]
+  Indexes { (id_pago, id_obligacion_pago) [unique, name: "uq_finanzas_pago_obligacion"] }
+}
 
-Ref: alumnos_examendetalle.examen_id > alumnos_examen.id [delete: cascade]
-Ref: alumnos_examendetalle.template_item_id > alumnos_examentemplateitem.id [delete: restrict]
+Ref: usuarios_docentes.id_usuario - auth_user.id [delete: restrict]
 
-Ref: alumnos_alumnocinturonhistorial.alumno_id > alumnos_alumno.id [delete: restrict]
-Ref: alumnos_alumnocinturonhistorial.cinturon_id > alumnos_cinturon.id [delete: restrict]
-Ref: alumnos_alumnocinturonhistorial.examen_id - alumnos_examen.id [delete: restrict]
+Ref: escuelas_docentes.id_escuela > escuelas.id [delete: restrict]
+Ref: escuelas_docentes.id_docente > usuarios_docentes.id [delete: restrict]
+
+Ref: alumnos.id_cinturon_actual > alumnos_cinturones.id [delete: restrict]
+Ref: alumnos_escuelas.id_alumno > alumnos.id [delete: restrict]
+Ref: alumnos_escuelas.id_escuela > escuelas.id [delete: restrict]
+
+Ref: alumnos_examenes_plantillas.id_cinturon > alumnos_cinturones.id [delete: restrict]
+Ref: alumnos_examenes_plantillas.id_plantilla_origen > alumnos_examenes_plantillas.id [delete: restrict]
+Ref: alumnos_examenes_plantillas_secciones.id_plantilla > alumnos_examenes_plantillas.id [delete: cascade]
+Ref: alumnos_examenes_plantillas_items.id_seccion > alumnos_examenes_plantillas_secciones.id [delete: cascade]
+
+Ref: alumnos_examenes.id_alumno > alumnos.id [delete: restrict]
+Ref: alumnos_examenes.id_plantilla > alumnos_examenes_plantillas.id [delete: restrict]
+Ref: alumnos_examenes.id_cinturon_origen > alumnos_cinturones.id [delete: restrict]
+Ref: alumnos_examenes.id_cinturon_destino > alumnos_cinturones.id [delete: restrict]
+
+Ref: alumnos_examenes_detalles.id_examen > alumnos_examenes.id [delete: cascade]
+Ref: alumnos_examenes_detalles.id_plantilla_item > alumnos_examenes_plantillas_items.id [delete: restrict]
+
+Ref: alumnos_cinturones_historial.id_alumno > alumnos.id [delete: restrict]
+Ref: alumnos_cinturones_historial.id_cinturon > alumnos_cinturones.id [delete: restrict]
+Ref: alumnos_cinturones_historial.id_examen - alumnos_examenes.id [delete: restrict]
+
+Ref: finanzas_conceptos.id_escuela > escuelas.id [delete: restrict]
+Ref: finanzas_configuraciones_cuota.id_escuela - escuelas.id [delete: restrict]
+Ref: finanzas_obligaciones.id_escuela > escuelas.id [delete: restrict]
+Ref: finanzas_obligaciones.id_alumno_escuela > alumnos_escuelas.id [delete: restrict]
+Ref: finanzas_obligaciones.id_concepto_financiero > finanzas_conceptos.id [delete: restrict]
+Ref: finanzas_obligaciones.id_usuario_creacion > auth_user.id [delete: restrict]
+Ref: finanzas_pagos.id_escuela > escuelas.id [delete: restrict]
+Ref: finanzas_pagos.id_alumno_escuela > alumnos_escuelas.id [delete: restrict]
+Ref: finanzas_pagos.id_usuario_registro > auth_user.id [delete: restrict]
+Ref: finanzas_pagos_aplicaciones.id_pago > finanzas_pagos.id [delete: restrict]
+Ref: finanzas_pagos_aplicaciones.id_obligacion_pago > finanzas_obligaciones.id [delete: restrict]

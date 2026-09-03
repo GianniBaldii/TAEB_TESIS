@@ -96,7 +96,15 @@
                 </div>
             </div>
             {% include "parciales/enlace_proximamente.html" with icono="iconos/asistencias.svg" texto="Asistencias" %}
-            {% include "parciales/enlace_proximamente.html" with icono="iconos/finanzas.svg" texto="Finanzas" %}
+            <div x-data="{ abierto: {% if request.resolver_match.app_name == 'finanzas' %}true{% else %}false{% endif %} }" class="space-y-1">
+                <button type="button" class="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold {% if request.resolver_match.app_name == 'finanzas' %}bg-blue-50 text-blue-700{% else %}text-slate-600 transition hover:bg-slate-100 hover:text-slate-900{% endif %}" @click="abierto = !abierto">
+                    <span class="flex items-center gap-3"><img src="{% static 'iconos/finanzas.svg' %}" alt="" class="h-5 w-5">Finanzas</span><span class="text-xs" x-text="abierto ? '^' : 'v'"></span>
+                </button>
+                <div x-show="abierto" class="ml-8 space-y-1">
+                    <a href="{% url 'finanzas:cuota_list' %}" class="block rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100">Cuotas y cobros</a>
+                    <a href="{% url 'finanzas:configuracion' %}" class="block rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100">Configuración</a>
+                </div>
+            </div>
             {% include "parciales/enlace_proximamente.html" with icono="iconos/eventos.svg" texto="Eventos" %}
         </div>
 

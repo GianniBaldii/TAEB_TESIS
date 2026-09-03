@@ -9,6 +9,7 @@ from ..selectors import alumno_selectors
 from ..services import alumno_service, trayectoria_taekwondista_service
 from ..services.excepciones import AlumnosError
 from ._helpers import alumno_accesible, escuela_operativa, examen_queryset, mensaje_error_validacion
+from apps.finanzas.selectors.finanzas_selectors import obligaciones_de_alumno, estado_obligacion
 
 @login_required
 def alumno_list(request):
@@ -50,7 +51,15 @@ def alumno_detail(request, pk):
     # La ficha también es el punto de entrada para reactivar una inscripción.
     # El acceso sigue limitado a la escuela visible del usuario, pero no al estado.
     alumno, inscripcion = alumno_accesible(request, pk, incluir_inactiva=True)
-    return render(request, "alumnos/alumno_detail.html", {"alumno": alumno, "inscripcion": inscripcion, "credencial_mobile": getattr(alumno, "credencial_mobile", None), "generar_credenciales_form": GenerarCredencialesAlumnoForm(), "resetear_password_form": ResetearPasswordAlumnoForm(), "bloquear_acceso_form": BloquearAccesoMobileAlumnoForm(), "progreso": alumno_service.obtener_progreso_alumno(alumno), "analisis_trayectoria": trayectoria_taekwondista_service.obtener_analisis_trayectoria(alumno), "examenes": examen_queryset(alumno).exclude(estado=Examen.Estado.ANULADO), "historial": alumno.historial_cinturones.select_related("cinturon", "examen")})
+    obligaciones = list(obligaciones_de_alumno(inscripcion))
+    resumen_financiero = {
+        "pendiente": sum((o.saldo for o in obligaciones), 0),
+        "atrasado": sum((o.saldo for o in obligaciones if estado_obligacion(o)["temporal"] == "ATRASADA"), 0),
+        "ultima": obligaciones[0] if obligaciones else None,
+    }
+    if resumen_financiero["ultima"]:
+        resumen_financiero["estado_ultima"] = estado_obligacion(resumen_financiero["ultima"])
+    return render(request, "alumnos/alumno_detail.html", {"alumno": alumno, "inscripcion": inscripcion, "credencial_mobile": getattr(alumno, "credencial_mobile", None), "generar_credenciales_form": GenerarCredencialesAlumnoForm(), "resetear_password_form": ResetearPasswordAlumnoForm(), "bloquear_acceso_form": BloquearAccesoMobileAlumnoForm(), "progreso": alumno_service.obtener_progreso_alumno(alumno), "analisis_trayectoria": trayectoria_taekwondista_service.obtener_analisis_trayectoria(alumno), "examenes": examen_queryset(alumno).exclude(estado=Examen.Estado.ANULADO), "historial": alumno.historial_cinturones.select_related("cinturon", "examen"), "resumen_financiero": resumen_financiero})
 
 @login_required
 def alumno_baja(request, pk):

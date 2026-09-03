@@ -1,0 +1,2 @@
+class FinanzasError(Exception):
+    pass

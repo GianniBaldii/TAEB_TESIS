@@ -1,0 +1,14 @@
+{% if estado.pago == 'PAGADA' %}
+<span class="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700"><i class="fa-solid fa-circle-check"></i>Pagada</span>
+{% elif estado.pago == 'PARCIAL' %}
+<span class="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700"><i class="fa-solid fa-circle-half-stroke"></i>Parcial</span>
+{% elif estado.pago == 'ANULADA' %}
+<span class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600"><i class="fa-solid fa-ban"></i>Anulada</span>
+{% elif estado.temporal == 'ATRASADA' %}
+<span class="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-bold text-red-700"><i class="fa-solid fa-triangle-exclamation"></i>Atrasada</span>
+{% elif estado.temporal == 'VENCIDA' %}
+<span class="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700"><i class="fa-solid fa-clock"></i>Vencida</span>
+{% else %}
+<span class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-600"><i class="fa-regular fa-clock"></i>Pendiente</span>
+{% endif %}
+{% if estado.pago == 'PARCIAL' and estado.temporal != 'VIGENTE' %}<span class="ml-1 text-xs font-semibold {% if estado.temporal == 'ATRASADA' %}text-red-600{% else %}text-amber-600{% endif %}">· {{ estado.temporal|title }}</span>{% endif %}
