@@ -15,6 +15,7 @@ urlpatterns = [
     path("docentes/<int:pk>/", views.docente_detail, name="docente_detail"),
     path("docentes/<int:pk>/activar/", views.docente_estado, {"activar": True}, name="docente_activar"),
     path("docentes/<int:pk>/desactivar/", views.docente_estado, {"activar": False}, name="docente_desactivar"),
+    path("docentes/<int:pk>/resetear-password/", views.docente_resetear_password, name="docente_resetear_password"),
     path("docentes/<int:pk>/escuelas/nueva/", views.docente_escuela_create, name="docente_escuela_create"),
     path("docentes/relaciones/<int:pk>/activar/", views.docente_escuela_estado, {"activar": True}, name="docente_escuela_activar"),
     path("docentes/relaciones/<int:pk>/desactivar/", views.docente_escuela_estado, {"activar": False}, name="docente_escuela_desactivar"),

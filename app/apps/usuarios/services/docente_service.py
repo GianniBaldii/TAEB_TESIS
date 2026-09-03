@@ -35,6 +35,12 @@ def reactivar_docente(docente):
     return docente
 
 
+def resetear_password_docente(docente, nueva_password):
+    docente.usuario.set_password(nueva_password)
+    docente.usuario.save(update_fields=["password"])
+    return docente
+
+
 def vincular_docente_a_escuela(docente, escuela, rol):
     if not escuela.activo:
         raise EscuelasError("No se puede asignar una escuela inactiva.")

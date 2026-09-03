@@ -24,7 +24,11 @@ class DashboardViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "tablero/inicio.html")
         self.assertContains(response, "Alumnos")
-        self.assertContains(response, "Próximamente")
+        self.assertContains(response, "No tenés una escuela activa asignada")
+        self.assertContains(response, "Clases de hoy")
+        self.assertContains(response, "Cobrado este mes")
+        self.assertContains(response, "Sin escuela asignada")
+        self.assertContains(response, "Asistencias pendientes")
         self.assertNotContains(response, "Administración")
 
     def test_shows_administration_to_superuser(self):
@@ -37,4 +41,6 @@ class DashboardViewTests(TestCase):
         response = self.client.get(reverse("core:dashboard"))
 
         self.assertContains(response, "Administración")
+        self.assertContains(response, "Todas las escuelas")
+        self.assertContains(response, "Generar cuotas")
         self.assertContains(response, reverse("admin:index"))

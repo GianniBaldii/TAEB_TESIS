@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from apps.usuarios.models import Docente
 from apps.usuarios.services import docente_service
 from ..decorators import requerir_superadmin
-from ..forms import DocenteAltaForm, DocenteEscuelaForm
+from ..forms import DocenteAltaForm, DocenteEscuelaForm, ResetearPasswordDocenteForm
 from ..selectors import docente_escuela_selectors
 from ..services import docente_escuela_service
 from ..services.excepciones import EscuelasError
@@ -33,7 +33,22 @@ def docente_list(request):
 @requerir_superadmin
 def docente_detail(request, pk):
     docente = get_object_or_404(docente_escuela_selectors.docentes_para_listado(), pk=pk)
-    return render(request, "escuelas/docente_detail.html", {"docente": docente})
+    return render(request, "escuelas/docente_detail.html", {"docente": docente, "resetear_password_form": ResetearPasswordDocenteForm(usuario=docente.usuario)})
+
+
+@requerir_superadmin
+def docente_resetear_password(request, pk):
+    docente = get_object_or_404(Docente.objects.select_related("usuario"), pk=pk)
+    if request.method == "POST":
+        form = ResetearPasswordDocenteForm(request.POST, usuario=docente.usuario)
+        if form.is_valid():
+            docente_service.resetear_password_docente(docente, form.cleaned_data["password1"])
+            messages.success(request, f"Contraseña de {docente} actualizada correctamente.")
+        else:
+            for errores in form.errors.values():
+                for error in errores:
+                    messages.error(request, error, extra_tags="validation_error")
+    return redirect("escuelas:docente_detail", pk=docente.pk)
 
 @requerir_superadmin
 def docente_estado(request, pk, activar):

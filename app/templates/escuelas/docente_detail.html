@@ -23,6 +23,24 @@
                 </div>
                 <div class="flex flex-wrap gap-2">
                     <a href="{% url 'escuelas:docente_list' %}" class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-arrow-left"></i>Volver</a>
+                    <div x-data="{ abierto: false, mostrar: false }">
+                        <button type="button" @click="abierto = true" class="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800 hover:bg-amber-100"><i class="fa-solid fa-key"></i>Resetear credenciales</button>
+                        <div x-cloak x-show="abierto" @keydown.escape.window="abierto = false" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+                            <div @click.outside="abierto = false" class="w-full max-w-lg rounded-2xl bg-white p-6 text-left shadow-2xl">
+                                <div class="flex items-start justify-between gap-4">
+                                    <div><p class="text-sm font-bold uppercase tracking-wide text-amber-700">Seguridad</p><h3 class="mt-1 text-xl font-black text-slate-950">Resetear credenciales</h3><p class="mt-2 text-sm text-slate-500">Definí una nueva contraseña para <strong>{{ docente }}</strong>. Sus sesiones actuales dejarán de ser válidas.</p></div>
+                                    <button type="button" @click="abierto = false" class="rounded-lg p-2 text-slate-400 hover:bg-slate-100" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                                <form method="post" action="{% url 'escuelas:docente_resetear_password' docente.pk %}" class="mt-5 space-y-4">
+                                    {% csrf_token %}
+                                    <label class="block"><span class="mb-1.5 block text-sm font-bold text-slate-700">Nueva contraseña</span><input :type="mostrar ? 'text' : 'password'" name="password1" autocomplete="new-password" class="block w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" required></label>
+                                    <label class="block"><span class="mb-1.5 block text-sm font-bold text-slate-700">Confirmar nueva contraseña</span><input :type="mostrar ? 'text' : 'password'" name="password2" autocomplete="new-password" class="block w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" required></label>
+                                    <label class="flex items-center gap-2 text-sm font-semibold text-slate-600"><input type="checkbox" x-model="mostrar" class="rounded border-slate-300 text-blue-700">Mostrar contraseña</label>
+                                    <div class="flex justify-end gap-2 border-t border-slate-100 pt-4"><button type="button" @click="abierto = false" class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancelar</button><button type="submit" class="rounded-xl bg-amber-600 px-4 py-2 text-sm font-bold text-white hover:bg-amber-700"><i class="fa-solid fa-key mr-2"></i>Actualizar contraseña</button></div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                     <form method="post" action="{% if docente.activo %}{% url 'escuelas:docente_desactivar' docente.pk %}{% else %}{% url 'escuelas:docente_activar' docente.pk %}{% endif %}">{% csrf_token %}<button class="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold {% if docente.activo %}border-red-200 bg-red-50 text-red-700 hover:bg-red-100{% else %}border-green-200 bg-green-50 text-green-700 hover:bg-green-100{% endif %}"><i class="fa-solid {% if docente.activo %}fa-user-slash{% else %}fa-user-check{% endif %}"></i>{% if docente.activo %}Desactivar{% else %}Reactivar{% endif %}</button></form>
                 </div>
             </div>

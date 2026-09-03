@@ -44,3 +44,22 @@ class DocenteEscuelaForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         aplicar_estilos_campos(self.fields)
+
+
+class ResetearPasswordDocenteForm(forms.Form):
+    password1 = forms.CharField(label="Nueva contraseña", widget=forms.PasswordInput)
+    password2 = forms.CharField(label="Confirmar nueva contraseña", widget=forms.PasswordInput)
+
+    def __init__(self, *args, usuario=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.usuario = usuario
+        aplicar_estilos_campos(self.fields)
+
+    def clean(self):
+        data = super().clean()
+        password = data.get("password1")
+        if password != data.get("password2"):
+            self.add_error("password2", "Las contraseñas no coinciden.")
+        if password:
+            validate_password(password, user=self.usuario)
+        return data
